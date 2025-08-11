@@ -14,4 +14,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
     secret: process.env.AUTH_SECRET,
+    callbacks: {
+    async jwt({ token, account }) {
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = typeof token.accessToken === "string" ? token.accessToken : undefined;
+      return session;
+    },
+  },
 })
