@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroui/button": "^2.2.24",
+    "@heroui/react": "^2.8.2",
+    "@heroui/system": "^2.4.20",
+    "@heroui/theme": "^2.4.20",
+    "framer-motion": "^12.23.12",
     "next": "15.4.6",
     "next-auth": "5.0.0-beta.29",
     "react": "19.1.0",
