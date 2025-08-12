@@ -2,7 +2,8 @@
 
 import useRepoContent from '@/hooks/useRepoContent';
 import { motion } from 'framer-motion';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { Breadcrumbs, BreadcrumbItem } from '@heroui/breadcrumbs';
 
 type RepoContentViewProps = {
   repoFullName: string;
@@ -16,22 +17,7 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
     if (item.type === 'dir') setPath(item.path);
   };
 
-  const handleBackClick = () => {
-    if (!path) return;
-    const segments = path.split('/').filter(Boolean);
-    segments.pop();
-    setPath(segments.join('/'));
-  };
-
-  const breadcrumbs = useMemo(() => {
-    const segments = path.split('/').filter(Boolean);
-    const crumbs = [] as { label: string; full: string }[];
-    segments.forEach((seg, idx) => {
-      const full = segments.slice(0, idx + 1).join('/');
-      crumbs.push({ label: seg, full });
-    });
-    return crumbs;
-  }, [path]);
+  const segments = path.split('/').filter(Boolean);
 
   if (isLoading) {
     return (
@@ -50,12 +36,14 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
 
   if (error) {
     return (
-      <div className="w-full max-w-xl mt-8 rounded-xl border border-red-500/30 bg-red-950/30 p-5 text-red-200">
-        <p className="font-semibold mb-2">Error loading contents</p>
-        <p className="text-sm opacity-80">{error}</p>
-        {path && (
-          <button onClick={handleBackClick} className="mt-4 text-xs underline hover:text-red-100">Go up a level</button>
-        )}
+      <div className="w-full max-w-5xl mt-6 rounded-xl border border-red-500/30 bg-red-950/30 p-5 text-red-200">
+        <p className="font-semibold mb-1">Error loading contents</p>
+        <p className="text-sm opacity-80 mb-3">{error}</p>
+        <button
+          onClick={() => setPath(segments.slice(0, -1).join('/'))}
+          disabled={!path}
+          className="inline-flex items-center gap-1 rounded-md border border-red-400/30 bg-red-400/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-red-200 hover:bg-red-400/20 disabled:opacity-40 disabled:cursor-not-allowed"
+        >Try Parent</button>
       </div>
     );
   }
@@ -68,43 +56,35 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
   });
 
   return (
-    <div className="w-full max-w-xl mt-8 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] p-5 shadow-lg backdrop-blur-sm">
-      <header className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-inset ring-indigo-400/30 text-indigo-300">
+    <div className="w-full max-w-5xl mt-6 rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] px-6 py-5 shadow-lg backdrop-blur-sm">
+      <div className="flex items-start justify-between gap-6 flex-wrap mb-3">
+        <div className="flex items-center gap-3 min-w-[220px]">
+          <div className="h-11 w-11 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-inset ring-indigo-400/30 text-indigo-300">
             <span className="text-lg">📦</span>
           </div>
           <div className="flex flex-col">
-            <h3 className="text-base font-semibold tracking-wide text-white/90">Repository Contents</h3>
-            <p className="text-xs font-medium text-white/50 truncate max-w-[18rem]" title={repoFullName}>{repoFullName}</p>
+            <h3 className="text-sm font-semibold tracking-wide text-white/90">Repository Contents</h3>
+            <p className="text-[11px] font-medium text-white/50 truncate max-w-[240px]" title={repoFullName}>{repoFullName}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap text-[11px] font-mono text-white/50">
-          <button
-            disabled={!path}
-            onClick={handleBackClick}
-            className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
-          >
-            ← Back
-          </button>
-          <div className="flex items-center gap-1 overflow-x-auto max-w-full">
-            <span
-              onClick={() => setPath('')}
-              className={`cursor-pointer hover:text-white/90 transition-colors ${!path ? 'text-white' : ''}`}
-            >root</span>
-            {breadcrumbs.map((c, i) => (
-              <span key={c.full} className="flex items-center gap-1">
-                <span className="opacity-30">/</span>
-                <span
-                  onClick={() => setPath(c.full)}
-                  className={`cursor-pointer hover:text-white/90 transition-colors ${i === breadcrumbs.length - 1 ? 'text-white' : ''}`}
-                >{c.label}</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </header>
-      <div className="mt-4 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
+        <Breadcrumbs size="sm" underline="hover" className="text-[11px] font-mono" itemClasses={{separator: 'text-white/30'}}>
+          <BreadcrumbItem key="root" onClick={() => setPath('')} className={!path ? 'text-white' : ''}>root</BreadcrumbItem>
+          {segments.map((seg, idx) => {
+            const full = segments.slice(0, idx + 1).join('/');
+            const isLast = idx === segments.length - 1;
+            return (
+              <BreadcrumbItem
+                key={full}
+                onClick={() => !isLast && setPath(full)}
+                className={isLast ? 'text-white' : ''}
+              >
+                {seg}
+              </BreadcrumbItem>
+            );
+          })}
+        </Breadcrumbs>
+      </div>
+      <div className="mt-2 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar">
         <ul className="space-y-1">
           {sorted.map((item: any, idx: number) => {
             const isDir = item.type === 'dir';
