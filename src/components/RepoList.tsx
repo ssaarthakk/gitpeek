@@ -1,9 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import useRepos from '@/hooks/useRepo';
+import { Select, SelectItem } from "@heroui/select";
 
-export default function RepoList() {
+type RepoListProps = {
+    onRepoSelect: (repoFullName: string) => void;
+};
+
+export default function RepoList({ onRepoSelect }: RepoListProps) {
     const { repos, isLoading } = useRepos();
 
     if (isLoading) {
@@ -14,13 +18,22 @@ export default function RepoList() {
         return (
             <div>
                 <h2 className='font-bold text-xl py-4'>Your Repositories:</h2>
-                <ul className='flex flex-col font-medium text-lg gap-2'>
+                <Select
+                    className="min-w-2xs"
+                    label="Select a repository"
+                    onChange={(event) => {
+                        const value = event.target.value;
+                        onRepoSelect(value);
+                    }}
+                    size='md'
+                    labelPlacement='inside'
+                >
                     {repos.map((repo) => (
-                        <li key={repo.id} className='text-blue-500 hover:underline'>
-                            <Link href={`https://github.com/${repo.full_name}`} target='_blank'>{repo.name}</Link>
-                        </li>
+                        <SelectItem key={repo.full_name} >
+                            {repo.full_name}
+                        </SelectItem>
                     ))}
-                </ul>
+                </Select>
             </div>
         );
     }

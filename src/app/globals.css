@@ -2,3 +2,11 @@
 @plugin '../hero.ts';
 @source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Custom scrollbar styling (Webkit) */
+.custom-scrollbar::-webkit-scrollbar { width: 10px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05)); border-radius: 9999px; border: 2px solid rgba(0,0,0,0.25); }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.1)); }

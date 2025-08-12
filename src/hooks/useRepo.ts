@@ -25,7 +25,9 @@ export default function useRepos() {
       }
     };
 
-    fetchRepos();
+    if (repos.length === 0 && session?.accessToken) {
+      fetchRepos();
+    }
   }, [session]);
 
   return { repos, isLoading };
