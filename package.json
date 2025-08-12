@@ -9,15 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.10.0",
     "@heroui/breadcrumbs": "^2.2.20",
     "@heroui/button": "^2.2.24",
     "@heroui/react": "^2.8.2",
     "@heroui/select": "^2.4.25",
     "@heroui/system": "^2.4.20",
     "@heroui/theme": "^2.4.20",
+    "@neondatabase/serverless": "^1.0.1",
     "@octokit/core": "^7.0.3",
     "@octokit/types": "^14.1.0",
     "@primer/octicons-react": "^19.9.0",
+    "@prisma/adapter-neon": "^6.14.0",
+    "@prisma/client": "6.13.0",
     "framer-motion": "^12.23.12",
     "github-markdown-css": "^5.8.1",
     "next": "15.4.6",
@@ -37,6 +41,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "prisma": "^6.13.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
