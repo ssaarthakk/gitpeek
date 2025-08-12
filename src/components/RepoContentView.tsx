@@ -2,12 +2,40 @@
 
 import useRepoContent from '@/hooks/useRepoContent';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/breadcrumbs';
 import useFileContent from '@/hooks/useFileContent';
 import { Button } from '@heroui/button';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+// Higher contrast GitHub-inspired dark theme
+const githubDarkTheme = {
+    ...vscDarkPlus,
+    'pre[class*="language-"]': {
+        ...vscDarkPlus['pre[class*="language-"]'],
+        background: 'transparent',
+        color: '#c9d1d9'
+    },
+    'code[class*="language-"]': {
+        ...vscDarkPlus['code[class*="language-"]'],
+        background: 'transparent',
+        color: '#c9d1d9'
+    },
+    comment: { color: '#8b949e' },
+    punctuation: { color: '#c9d1d9' },
+    property: { color: '#d2a8ff' },
+    tag: { color: '#7ee787' },
+    boolean: { color: '#79c0ff' },
+    number: { color: '#79c0ff' },
+    selector: { color: '#ffa657' },
+    'attr-name': { color: '#ffa657' },
+    string: { color: '#a5d6ff' },
+    char: { color: '#a5d6ff' },
+    builtin: { color: '#ffa657' },
+    function: { color: '#d2a8ff' },
+    keyword: { color: '#ff7b72' }
+};
 
 type RepoContentViewProps = {
     repoFullName: string;
@@ -55,6 +83,13 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
         setSelectedType(null);
     };
 
+    // Reset selection if repository changes
+    useEffect(() => {
+        setPath('');
+        setSelectedPath(null);
+        setSelectedType(null);
+    }, [repoFullName]);
+
     const leftSorted = Array.isArray(leftContent)
         ? [...leftContent].sort((a: any, b: any) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'dir' ? -1 : 1))
         : [];
@@ -63,98 +98,127 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
         ? [...rightDirContent].sort((a: any, b: any) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'dir' ? -1 : 1))
         : [];
 
-    return (
-        <div className="w-full max-w-6xl mx-auto mt-6 flex gap-4 h-[680px]">
-            {/* Left Panel */}
-            <div className="basis-1/3 flex flex-col rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] shadow-lg backdrop-blur-sm overflow-hidden">
-                <div className="px-4 pt-4 pb-3 border-b border-white/10 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-inset ring-indigo-400/30 text-indigo-300">📦</div>
-                        <div>
-                            <h3 className="text-xs font-semibold tracking-wide text-white/90">Files</h3>
-                            <p className="text-[10px] font-medium text-white/40 truncate max-w-[140px]" title={repoFullName}>{repoFullName}</p>
+        return (
+                <div className="w-full h-full flex flex-col md:flex-row gap-4 p-4">
+                        {/* Left Panel */}
+                        <div className="basis-full md:basis-1/3 flex flex-col rounded-xl bg-white/[0.03] backdrop-blur-md shadow-[0_4px_18px_-4px_rgba(0,0,0,0.55)] overflow-hidden ring-1 ring-white/5 min-h-[260px] md:min-h-0">
+                                <div className="px-4 pt-4 pb-2 border-b border-white/5 flex items-center justify-between gap-2 bg-white/[0.02] backdrop-blur-sm">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-indigo-400/30 text-indigo-200 text-sm">
+                                                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M1.5 3.25A.75.75 0 0 1 2.25 2.5h3.072a.75.75 0 0 1 .53.22l1.128 1.13h6.27a.75.75 0 0 1 .75.75v6.9a1.75 1.75 0 0 1-1.75 1.75h-10A1.75 1.75 0 0 1 .5 11.5v-7a.75.75 0 0 1 .75-.75Z"/></svg>
                         </div>
+                                                <h3 className="text-[14px] font-semibold tracking-wide text-white truncate" title={repoFullName}>{repoFullName}</h3>
                     </div>
                     {path && (
                         <Button size="sm" variant="flat" className="text-[10px]" onPress={goUpLeft}>Up</Button>
                     )}
                 </div>
-                <div className="px-4 py-2 border-b border-white/10">
-                    <Breadcrumbs size="sm" underline="hover" className="text-[10px] font-mono" itemClasses={{ separator: 'text-white/30' }}>
-                        <BreadcrumbItem key="root" onClick={() => openDirectoryInLeft('')} className={!path ? 'text-white' : ''}>root</BreadcrumbItem>
-                        {breadcrumbSegments.map((seg, idx) => {
-                            const full = breadcrumbSegments.slice(0, idx + 1).join('/');
-                            const isLast = idx === breadcrumbSegments.length - 1;
-                            return (
-                                <BreadcrumbItem
-                                    key={full}
-                                    onClick={() => !isLast && openDirectoryInLeft(full)}
-                                    className={isLast ? 'text-white' : ''}
-                                >{seg}</BreadcrumbItem>
-                            );
-                        })}
-                    </Breadcrumbs>
-                </div>
+                                                {breadcrumbSegments.length > 0 && (
+                                                    <div className="px-3 py-1 border-b border-white/5">
+                                                        <Breadcrumbs size="sm" underline="hover" className="text-[11px] font-mono" itemClasses={{ separator: 'text-white/25' }}>
+                                            {breadcrumbSegments.map((seg, idx) => {
+                                                const full = breadcrumbSegments.slice(0, idx + 1).join('/');
+                                                const isLast = idx === breadcrumbSegments.length - 1;
+                                                return (
+                                                    <BreadcrumbItem
+                                                        key={full}
+                                                        onClick={() => !isLast && openDirectoryInLeft(full)}
+                                                        className={isLast ? 'text-sky-400' : ''}
+                                                    >{seg}</BreadcrumbItem>
+                                                );
+                                            })}
+                                        </Breadcrumbs>
+                                    </div>
+                                )}
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-2 relative">
-                    {leftError && (
+                    {/* Overlay skeleton when switching directories for smoother feel */}
+                    {isLeftLoading && (
+                        <div className="absolute inset-0 bg-[#0b0f14]/60 backdrop-blur-sm flex items-start p-2 overflow-hidden">
+                            <div className="flex-1"><LeftSkeleton /></div>
+                        </div>
+                    )}
+                    {leftError && !isLeftLoading && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-red-300 text-xs gap-2 bg-red-900/10">
                             <p>Error loading directory.</p>
                             <Button size="sm" onPress={() => openDirectoryInLeft(path)}>Retry</Button>
                         </div>
                     )}
-                    {isLeftLoading && !leftContent && <LeftSkeleton />}
                     {!isLeftLoading && leftContent && leftSorted.length === 0 && (
                         <p className="text-center text-xs text-white/40 mt-8">Empty directory.</p>
                     )}
-                    <ul className="space-y-1">
+                    <ul className="space-y-0.5">
                         {leftSorted.map((item: any, idx: number) => {
                             const isDir = item.type === 'dir';
                             const isSelected = selectedPath === item.path;
                             return (
                                 <motion.li
                                     key={item.sha}
-                                    initial={{ opacity: 0, y: 4 }}
+                                    initial={{ opacity: 0, y: 3 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.01, duration: 0.2 }}
+                                    transition={{ delay: idx * 0.008, duration: 0.18 }}
                                     onClick={() => selectItem(item)}
                                     onDoubleClick={() => isDir && openDirectoryInLeft(item.path)}
-                                    className={`group flex items-center gap-3 rounded-md border px-2 py-1.5 text-[13px] font-medium cursor-pointer select-none shadow-inner shadow-black/30 ring-1 ring-inset transition-colors
-                                        ${isSelected ? 'bg-indigo-500/25 border-indigo-400/40 text-white' : 'bg-white/[0.03] border-transparent text-white/70 hover:bg-white/10 hover:text-white'}
+                                    className={`group flex items-center gap-2 rounded-md px-2 py-1.5 text-[12.5px] font-medium cursor-pointer select-none transition-colors
+                                        ${isSelected ? 'bg-indigo-500/30 text-white shadow-inner shadow-indigo-900/40' : 'hover:bg-white/10 text-white/70'}
                                     `}
                                 >
-                                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded ring-1 ring-inset
-                                        ${isDir ? 'bg-amber-500/15 text-amber-300 ring-amber-400/30 group-hover:bg-amber-500/25' : 'bg-sky-500/15 text-sky-300 ring-sky-400/30 group-hover:bg-sky-500/25'}`}>{isDir ? '📁' : '📄'}</span>
+                                                                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${isDir ? 'text-amber-300' : 'text-sky-300'}`}>
+                                                                            {isDir ? (
+                                                                                <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M1.5 3.25A.75.75 0 0 1 2.25 2.5h3.072a.75.75 0 0 1 .53.22l1.128 1.13h6.27a.75.75 0 0 1 .75.75v6.9a1.75 1.75 0 0 1-1.75 1.75h-10A1.75 1.75 0 0 1 .5 11.5v-7a.75.75 0 0 1 .75-.75Z"/></svg>
+                                                                            ) : (
+                                                                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M4 2.75C4 2.336 4.336 2 4.75 2h4.5c.199 0 .389.079.53.22l2 2a.75.75 0 0 1 .22.53v8.5A1.75 1.75 0 0 1 10.25 15h-5.5A1.75 1.75 0 0 1 3 13.25V2.75A.75.75 0 0 1 3.75 2h.5Zm1 .75v9.75c0 .138.112.25.25.25h5.5a.25.25 0 0 0 .25-.25V6h-1.25a.75.75 0 0 1-.75-.75V4H5Z"/></svg>
+                                                                            )}
+                                                                        </span>
                                     <span className="truncate font-mono tracking-tight" title={item.name}>{item.name}</span>
                                     {isDir ? (
-                                        <span className="ml-auto rounded-full bg-amber-400/15 px-2 py-[1px] text-[9px] font-semibold uppercase tracking-wide text-amber-200">DIR</span>
+                                        <span className="ml-auto rounded bg-amber-400/15 px-1.5 py-[1px] text-[8.5px] font-semibold uppercase tracking-wide text-amber-200">DIR</span>
                                     ) : (
-                                        <span className="ml-auto text-[9px] uppercase tracking-wide text-white/30">FILE</span>
+                                        <span className="ml-auto text-[8.5px] uppercase tracking-wide text-white/40">FILE</span>
                                     )}
                                 </motion.li>
                             );
                         })}
                     </ul>
                 </div>
-                <div className="p-2 border-t border-white/10 flex justify-between gap-2 text-[10px] text-white/40">
-                    <span>{leftSorted.length} items</span>
-                    {selectedPath && (
-                        <button onClick={clearSelection} className="hover:text-white/70">Clear selection</button>
-                    )}
-                </div>
+                {/* Footer removed per request */}
             </div>
 
             {/* Right Panel */}
-            <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-gradient-to-b from-white/5 to-white/[0.02] shadow-lg backdrop-blur-sm overflow-hidden">
-                <div className="px-5 pt-4 pb-3 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-col min-w-[200px]">
-                        <h3 className="text-xs font-semibold tracking-wide text-white/90">
+                        <div className="flex-1 flex flex-col rounded-xl bg-white/[0.04] backdrop-blur-md shadow-[0_4px_22px_-6px_rgba(0,0,0,0.55)] overflow-hidden ring-1 ring-white/5 min-h-[320px]">
+                                <div className="px-5 pt-3 pb-2 border-b border-white/5 flex flex-wrap items-center gap-4">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-4 min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 min-w-0 mb-1 md:mb-0">
+                                                    <h3 className="text-sm font-semibold tracking-wide text-white/90 whitespace-nowrap">
                             {!selectedPath && 'No Selection'}
                             {selectedType === 'file' && 'File Preview'}
                             {selectedType === 'dir' && 'Folder Contents'}
-                        </h3>
-                        {selectedPath && (
-                            <p className="text-[10px] font-medium text-white/45 font-mono truncate max-w-[420px]" title={selectedPath}>{selectedPath}</p>
-                        )}
+                                                    </h3>
+                                                                                {(selectedType === 'dir' || (selectedType === 'file' && selectedPath)) && (
+                                                                                    <div className="max-w-full overflow-hidden">
+                                                                                        <Breadcrumbs size="sm" underline="hover" className="text-[12px] font-mono" itemClasses={{ separator: 'text-white/25' }}>
+                                                                {selectedPath?.split('/').filter(Boolean).map((segment, idx, arr) => {
+                                                                    const full = selectedPath.split('/').slice(0, idx + 1).join('/');
+                                                                    const isLast = idx === arr.length - 1;
+                                                                    return (
+                                                                        <BreadcrumbItem
+                                                                            key={full}
+                                                                            onClick={() => {
+                                                                                if (!isLast) {
+                                                                                    setSelectedPath(full);
+                                                                                    setSelectedType('dir');
+                                                                                }
+                                                                            }}
+                                                                            className={isLast ? 'text-sky-400' : ''}
+                                                                        >{segment}</BreadcrumbItem>
+                                                                    );
+                                                                })}
+                                                            </Breadcrumbs>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {selectedPath && (
+                                                    <p className="text-[10px] font-medium text-white/45 font-mono truncate" title={selectedPath}>{selectedPath}</p>
+                                                )}
                     </div>
                     {selectedType === 'dir' && selectedPath && (
                         <div className="text-[10px] text-white/40">{rightDirSorted.length} items</div>
@@ -169,11 +233,15 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
                     )}
                     {selectedType === 'dir' && selectedPath && (
                         <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4">
-                            {rightDirError && (
+                            {isRightDirLoading && (
+                                <div className="absolute inset-0 bg-[#0b0f14]/70 backdrop-blur-sm p-4 z-10">
+                                    <RightDirSkeleton />
+                                </div>
+                            )}
+                            {rightDirError && !isRightDirLoading && (
                                 <div className="text-red-300 text-xs mb-4">Error loading folder.</div>
                             )}
-                            {(isRightDirLoading && !rightDirContent) && <RightDirSkeleton />}
-                            {rightDirContent && (
+                            {rightDirContent && !isRightDirLoading && (
                                 <table className="w-full text-[12px] font-mono">
                                     <thead className="sticky top-0 backdrop-blur bg-black/30">
                                         <tr className="text-white/50">
@@ -191,7 +259,13 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
                                                     className="group cursor-pointer hover:bg-white/5"
                                                 >
                                                     <td className="py-1.5 px-2 flex items-center gap-2">
-                                                        <span className={`flex h-6 w-6 items-center justify-center rounded ring-1 ring-inset ${isDir ? 'bg-amber-500/15 text-amber-300 ring-amber-400/30 group-hover:bg-amber-500/25' : 'bg-sky-500/15 text-sky-300 ring-sky-400/30 group-hover:bg-sky-500/25'}`}>{isDir ? '📁' : '📄'}</span>
+                                                                                                                <span className={`flex h-6 w-6 items-center justify-center rounded ${isDir ? 'text-amber-300' : 'text-sky-300'}`}>
+                                                                                                                    {isDir ? (
+                                                                                                                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M1.5 3.25A.75.75 0 0 1 2.25 2.5h3.072a.75.75 0 0 1 .53.22l1.128 1.13h6.27a.75.75 0 0 1 .75.75v6.9a1.75 1.75 0 0 1-1.75 1.75h-10A1.75 1.75 0 0 1 .5 11.5v-7a.75.75 0 0 1 .75-.75Z"/></svg>
+                                                                                                                    ) : (
+                                                                                                                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M4 2.75C4 2.336 4.336 2 4.75 2h4.5c.199 0 .389.079.53.22l2 2a.75.75 0 0 1 .22.53v8.5A1.75 1.75 0 0 1 10.25 15h-5.5A1.75 1.75 0 0 1 3 13.25V2.75A.75.75 0 0 1 3.75 2h.5Zm1 .75v9.75c0 .138.112.25.25.25h5.5a.25.25 0 0 0 .25-.25V6h-1.25a.75.75 0 0 1-.75-.75V4H5Z"/></svg>
+                                                                                                                    )}
+                                                                                                                </span>
                                                         <span className="truncate" title={child.name}>{child.name}</span>
                                                     </td>
                                                     <td className="py-1.5 px-2 text-white/40 uppercase text-[10px]">{isDir ? 'DIR' : 'FILE'}</td>
@@ -209,15 +283,18 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
                     {selectedType === 'file' && selectedPath && (
                         <div className="absolute inset-0 overflow-auto custom-scrollbar">
                             {isRightFileLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center text-white/60 text-sm bg-black/50 z-10">Loading file...</div>
+                                <div className="absolute inset-0 bg-[#0b0f14]/80 backdrop-blur-sm z-10 p-4">
+                                    <CodeSkeleton />
+                                </div>
                             )}
-                            {rightFileContent && (
+                            {rightFileContent && !isRightFileLoading && (
                                 <SyntaxHighlighter
                                     language={detectLanguage(selectedPath)}
-                                    style={vscDarkPlus as any}
+                                    style={githubDarkTheme as any}
                                     customStyle={{ margin: 0, background: 'transparent', fontSize: '12px', padding: '18px 24px' }}
                                     wrapLongLines
                                     showLineNumbers
+                                    lineNumberStyle={{ color: '#6e7781', fontSize: '11px', paddingRight: '12px' }}
                                 >{rightFileContent}</SyntaxHighlighter>
                             )}
                             {!isRightFileLoading && !rightFileContent && (
@@ -301,6 +378,18 @@ function RightDirSkeleton() {
             {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="h-7 w-full overflow-hidden rounded bg-white/5 relative">
                     <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function CodeSkeleton() {
+    return (
+        <div className="space-y-2">
+            {Array.from({ length: 30 }).map((_, i) => (
+                <div key={i} className="h-3 w-full overflow-hidden rounded bg-white/5 relative">
+                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/15 to-transparent" />
                 </div>
             ))}
         </div>

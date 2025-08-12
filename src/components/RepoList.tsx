@@ -16,25 +16,24 @@ export default function RepoList({ onRepoSelect }: RepoListProps) {
 
     if (repos.length > 0) {
         return (
-            <div>
-                <h2 className='font-bold text-xl py-4'>Your Repositories:</h2>
-                <Select
-                    className="min-w-2xs"
-                    label="Select a repository"
-                    onChange={(event) => {
-                        const value = event.target.value;
-                        onRepoSelect(value);
-                    }}
-                    size='md'
-                    labelPlacement='inside'
-                >
-                    {repos.map((repo) => (
-                        <SelectItem key={repo.full_name} >
-                            {repo.full_name}
-                        </SelectItem>
-                    ))}
-                </Select>
-            </div>
+            <Select
+                aria-label="Repository selector"
+                className="min-w-[280px]"
+                placeholder="Select a repository"
+                onChange={(event) => {
+                    const value = event.target.value;
+                    onRepoSelect(value);
+                }}
+                size='sm'
+                labelPlacement='outside'
+                variant='flat'
+            >
+                {repos.map((repo) => (
+                    <SelectItem key={repo.full_name} >
+                        {repo.full_name}
+                    </SelectItem>
+                ))}
+            </Select>
         );
     }
 

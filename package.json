@@ -17,6 +17,7 @@
     "@heroui/theme": "^2.4.20",
     "@octokit/core": "^7.0.3",
     "@octokit/types": "^14.1.0",
+    "@primer/octicons-react": "^19.9.0",
     "framer-motion": "^12.23.12",
     "next": "15.4.6",
     "next-auth": "5.0.0-beta.29",

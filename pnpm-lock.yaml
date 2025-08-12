@@ -32,6 +32,9 @@ importers:
       '@octokit/types':
         specifier: ^14.1.0
         version: 14.1.0
+      '@primer/octicons-react':
+        specifier: ^19.9.0
+        version: 19.15.5(react@19.1.0)
       framer-motion:
         specifier: ^12.23.12
         version: 12.23.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1001,6 +1004,12 @@ packages:
 
   '@panva/hkdf@1.2.1':
     resolution: {integrity: sha512-6oclG6Y3PiDFcoyk8srjLfVKyMfVCKJ27JwNPViuXziFpmdz+MZnZN/aKY0JGXgYuO/VghU0jcOAZgWXZ1Dmrw==}
+
+  '@primer/octicons-react@19.15.5':
+    resolution: {integrity: sha512-JEoxBVkd6F8MaKEO1QKau0Nnk3IVroYn7uXGgMqZawcLQmLljfzua3S1fs2FQs295SYM9I6DlkESgz5ORq5yHA==}
+    engines: {node: '>=8'}
+    peerDependencies:
+      react: '>=16.3'
 
   '@react-aria/breadcrumbs@3.5.27':
     resolution: {integrity: sha512-fuXD9nvBaBVZO0Z6EntBlxQD621/2Ldcxz76jFjc4V/jNOq/6BIVQRtpnAYYrSTiW3ZV2IoAyxRWNxQU22hOow==}
@@ -4513,6 +4522,10 @@ snapshots:
       '@octokit/openapi-types': 25.1.0
 
   '@panva/hkdf@1.2.1': {}
+
+  '@primer/octicons-react@19.15.5(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
 
   '@react-aria/breadcrumbs@3.5.27(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:

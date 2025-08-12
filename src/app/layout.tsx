@@ -14,9 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark bg-[#0b0f14] text-[#f0f6fc]">
-      <body
-        className={`flex justify-center items-center w-screen h-screen`}
-      >
+      <body className="flex flex-col min-h-screen w-screen overflow-hidden font-sans antialiased">
         <Provider>
           {children}
         </Provider>
