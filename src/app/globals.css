@@ -5,6 +5,35 @@
 
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 
+/* GitHub Markdown base styles */
+@import 'github-markdown-css/github-markdown-dark.css';
+
+/* Scope markdown body (we already use dark variant) */
+.markdown-body {
+	background: transparent;
+	font-size: 14px;
+	line-height: 1.55;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 { line-height: 1.25; }
+.markdown-body h1 { font-size: 1.75rem; border-bottom: 1px solid #30363d; padding-bottom: .3em; }
+.markdown-body h2 { font-size: 1.4rem; border-bottom: 1px solid #30363d; padding-bottom: .25em; }
+.markdown-body h3 { font-size: 1.15rem; }
+.markdown-body h4 { font-size: 1rem; }
+.markdown-body table { display: table; width: 100%; border-collapse: collapse; }
+.markdown-body table th,
+.markdown-body table td { border: 1px solid #30363d; padding: 6px 10px; }
+.markdown-body blockquote { border-left: 4px solid #3b434b; background: #0d1117; padding: .6em 1em; color: #8b949e; }
+.markdown-body pre { position: relative; }
+.markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+.markdown-body hr { border-color: #30363d; }
+.markdown-body a { text-decoration: none; }
+.markdown-body a:hover { text-decoration: underline; }
+.markdown-body img { background: #0d1117; }
+
+
 /* Custom scrollbar styling (Webkit) */
 .custom-scrollbar::-webkit-scrollbar { width: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
