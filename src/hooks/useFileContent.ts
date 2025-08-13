@@ -10,7 +10,7 @@ type FileContentResult = {
   isLoading: boolean;
 };
 
-export default function useFileContent(repoFullName: string, filePath: string | null): FileContentResult {
+export default function useFileContent(repoFullName: string, filePath: string | null, providedToken?: string): FileContentResult {
   const { data: session } = useSession();
   const [content, setContent] = useState<string | null>(null);
   const [raw, setRaw] = useState<string | null>(null);
@@ -20,7 +20,8 @@ export default function useFileContent(repoFullName: string, filePath: string | 
 
   useEffect(() => {
     const fetchFile = async () => {
-      if (filePath && repoFullName && session?.accessToken) {
+      const accessToken = providedToken || session?.accessToken;
+      if (filePath && repoFullName && accessToken) {
         // Serve from cache if present
         if (cacheRef.current[key]) {
           setContent(cacheRef.current[key].decoded);
@@ -28,7 +29,7 @@ export default function useFileContent(repoFullName: string, filePath: string | 
           return;
         }
         setIsLoading(true);
-        const octokit = new Octokit({ auth: session.accessToken });
+        const octokit = new Octokit({ auth: accessToken });
         const [owner, repo] = repoFullName.split('/');
         try {
           const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path: filePath });

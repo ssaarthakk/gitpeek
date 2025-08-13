@@ -7,7 +7,7 @@ import { Endpoints } from '@octokit/types';
 
 type RepoContent = Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['response']['data'];
 
-export default function useRepoContent(repoFullName: string | null, path: string = '') {
+export default function useRepoContent(repoFullName: string | null, path: string = '', providedToken?: string) {
   const { data: session } = useSession();
   const [content, setContent] = useState<RepoContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +17,9 @@ export default function useRepoContent(repoFullName: string | null, path: string
 
   useEffect(() => {
     const fetchContent = async () => {
-      if (!repoFullName || !session?.accessToken) return;
+      const accessToken = providedToken || session?.accessToken;
+
+      if (!repoFullName || !accessToken) return;
       // If cached, use it and skip loading flicker
       if (cacheRef.current[key]) {
         setContent(cacheRef.current[key]);
@@ -26,7 +28,7 @@ export default function useRepoContent(repoFullName: string | null, path: string
       try {
         setIsLoading(true);
         setError(null);
-        const octokit = new Octokit({ auth: session.accessToken });
+        const octokit = new Octokit({ auth: accessToken });
         const [owner, repo] = repoFullName.split('/');
         const endpoint = path ? 'GET /repos/{owner}/{repo}/contents/{path}' : 'GET /repos/{owner}/{repo}/contents';
         const params: any = { owner, repo };
@@ -43,7 +45,7 @@ export default function useRepoContent(repoFullName: string | null, path: string
     };
 
     fetchContent();
-  }, [repoFullName, path, session, key]);
+  }, [repoFullName, path, session, key, providedToken]);
 
   return { content, isLoading, error };
 }

@@ -8,9 +8,10 @@ import RightPanel from './RepoContentView/RightPanel';
 
 type RepoContentViewProps = {
     repoFullName: string;
+    accessToken?: string;
 };
 
-export default function RepoContentView({ repoFullName }: RepoContentViewProps) {
+export default function RepoContentView({ repoFullName, accessToken  }: RepoContentViewProps) {
 
     const [path, setPath] = useState('');
     // Right-side selected item path & type (file or dir) independent of left path changes
@@ -22,12 +23,14 @@ export default function RepoContentView({ repoFullName }: RepoContentViewProps) 
     // If right panel is showing a directory, fetch its contents
     const { content: rightDirContent, isLoading: isRightDirLoading, error: rightDirError } = useRepoContent(
         selectedType === 'dir' ? repoFullName : null,
-        selectedType === 'dir' && selectedPath ? selectedPath : ''
+        selectedType === 'dir' && selectedPath ? selectedPath : '',
+        accessToken
     );
     // If right panel is showing a file, fetch file content
     const { content: rightFileContent, raw: rightFileRaw, isLoading: isRightFileLoading } = useFileContent(
         repoFullName,
-        selectedType === 'file' ? selectedPath : null
+        selectedType === 'file' ? selectedPath : null,
+        accessToken
     );
 
     const breadcrumbSegments = path.split('/').filter(Boolean);
