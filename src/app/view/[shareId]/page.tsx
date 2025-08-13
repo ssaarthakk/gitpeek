@@ -1,10 +1,9 @@
 import prisma from "@/lib/prisma";
-import { Octokit } from "@octokit/core";
 import RepoContentView from "@/components/RepoContentView";
 
 export default async function SharePageView({ params }: { params: { shareId: string } }) {
 
-    const shareId = await params.shareId;
+    const { shareId } = await params;
 
     const shareLink = await prisma.shareLink.findUnique({
         where: { id: shareId },
@@ -28,16 +27,8 @@ export default async function SharePageView({ params }: { params: { shareId: str
     const accessToken = account.access_token;
     const repoFullName = shareLink.repoFullName;
 
-    // We can pass the repoFullName to our existing component.
-    // Note: For a fully public view, we would create a new version of RepoContentView 
-    // that uses this server-provided access token instead of the session's token.
-    // For now, this structure sets up the server-side data fetching.
-
     return (
         <main className="flex h-screen w-screen">
-            {/* <h1>Viewing: {repoFullName}</h1>
-            <p style={{ fontStyle: 'italic' }}>This is a shared, read-only view.</p> */}
-
             <RepoContentView
                 repoFullName={repoFullName}
                 accessToken={accessToken}
