@@ -16,13 +16,17 @@ export const authConfig = {
   ],
   secret: process.env.AUTH_SECRET,
   callbacks: {
-    async jwt({ token, account }) {
-      if (account) {
+    async jwt({ token, account, user }) {
+      if (account && user) {
         token.accessToken = account.access_token;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
       session.accessToken = token.accessToken as string;
       return session;
     },

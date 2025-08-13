@@ -48,7 +48,8 @@ export async function POST(request: Request) {
     if (error instanceof Error && error.message === "Insufficient credits.") {
         return new NextResponse(JSON.stringify({ error: error.message }), { status: 402 });
     }
-
+    console.log(error);
+    
     return new NextResponse(JSON.stringify({ error: "An unexpected error occurred." }), { status: 500 });
   }
 }
