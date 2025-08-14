@@ -1,7 +1,14 @@
+import { auth } from "@/auth";
 import BuyCreditsButton from "@/components/BuyCreditsButton";
 import DisplayCredits from "@/components/DisplayCredits";
+import { useSession } from "next-auth/react";
 
-export default function BillingPage() {
+export default async function BillingPage() {
+  const session = await auth();
+  if (!session?.user) {
+    return <p>You're not logged in, Please Login.</p>
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="mb-8">

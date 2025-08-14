@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import prisma from "@/lib/prisma";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const signature = request.headers.get("stripe-signature")!;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+  let event: Stripe.Event;
+
+  try {
+    // Verify the event is genuinely from Stripe
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err: any) {
+    console.error(`❌ Error message: ${err.message}`);
+    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+  }
+
+  // Handle the 'checkout.session.completed' event
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    
+    // Retrieve the metadata we passed earlier
+    const userId = session.metadata?.userId;
+    const creditsToPurchase = Number(session.metadata?.creditsToPurchase);
+
+    if (!userId || !creditsToPurchase) {
+      return new NextResponse("Webhook Error: Missing metadata", { status: 400 });
+    }
+
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          credits: {
+            increment: creditsToPurchase,
+          },
+        },
+      });
+    } catch (err) {
+      return new NextResponse("Webhook Error: Failed to update user credits", { status: 500 });
+    }
+  }
+
+  return new NextResponse(null, { status: 200 });
+}
