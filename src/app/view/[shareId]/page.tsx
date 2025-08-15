@@ -13,6 +13,10 @@ export default async function SharePageView({ params }: { params: { shareId: str
         return <h1>Link not found or has expired.</h1>;
     }
 
+    if (shareLink.expiresAt && shareLink.expiresAt < new Date()) {
+        return <h1>This link has expired.</h1>;
+    }
+
     const account = await prisma.account.findFirst({
         where: {
             userId: shareLink.userId,

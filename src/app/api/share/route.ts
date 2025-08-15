@@ -10,9 +10,18 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const { repoFullName } = await request.json();
+  const { repoFullName, expiresIn } = await request.json();
   if (!repoFullName || typeof repoFullName !== 'string') {
     return new NextResponse(JSON.stringify({ error: "Repository name not provided" }), { status: 400 });
+  }
+
+  let expiresAt: Date | null = null;
+  if (expiresIn === '1-hour') {
+    expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  } else if (expiresIn === '24-hours') {
+    expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  } else if (expiresIn === '7-days') {
+    expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   }
 
   try {
@@ -36,9 +45,10 @@ export async function POST(request: Request) {
         data: {
           repoFullName: repoFullName,
           userId: session.user!.id as string,
+          expiresAt: expiresAt,
         },
       });
-      
+
       return shareLink;
     });
 
@@ -46,10 +56,10 @@ export async function POST(request: Request) {
 
   } catch (error) {
     if (error instanceof Error && error.message === "Insufficient credits.") {
-        return new NextResponse(JSON.stringify({ error: error.message }), { status: 402 });
+      return new NextResponse(JSON.stringify({ error: error.message }), { status: 402 });
     }
     console.log(error);
-    
+
     return new NextResponse(JSON.stringify({ error: "An unexpected error occurred." }), { status: 500 });
   }
 }
