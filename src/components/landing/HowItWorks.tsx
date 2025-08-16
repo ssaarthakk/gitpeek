@@ -26,6 +26,7 @@ export default function HowItWorks() {
     const c3CopyBtnRef = useRef<HTMLButtonElement | null>(null);
     const c3GlowRef = useRef<HTMLDivElement | null>(null);
     const [copied, setCopied] = useState(false);
+    const manualCopyUntilRef = useRef(0);
 
     useEffect(() => {
         gsap.registerPlugin(ScrollTrigger);
@@ -49,44 +50,41 @@ export default function HowItWorks() {
         gsap.set(c3, { opacity: 0 });
         if (c3GlowRef.current) gsap.set(c3GlowRef.current, { opacity: 0 });
 
+        // Build scroll-controlled timeline (no state .call here)
         const tl = gsap.timeline({ paused: true });
-
-        // Step 1: reveal and simulate click + loading
-        tl.to(c1, { opacity: 1, x: 0, duration: 0.6, ease: 'power3.out' })
-            .call(() => setSignInLoading(true))
-            .to(c1BtnRef.current, { scale: 0.96, duration: 0.12, ease: 'power1.inOut', yoyo: true, repeat: 1 }, '<')
-            .to({}, { duration: 0.6 }) // brief loading
-            .call(() => setSignInLoading(false));
-
-        // Step 2: reveal and cycle repo selection (minimize state churn)
-        tl.to(c2, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.2)' }, '>-0.05')
-            .call(() => setSelectedRepo(2))
-            .to({}, { duration: 0.2 })
-            .call(() => setSelectedRepo(1));
-
-        // Step 3: reveal, soft glow via overlay, simulate copy click + copied text
-        tl.to(c3, { opacity: 1, duration: 0.4, ease: 'power2.out' }, '>-0.05')
-            .to(c3GlowRef.current, { opacity: 1, duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1 }, '>-0.05')
-            .to(c3CopyBtnRef.current, { scale: 0.96, duration: 0.12, ease: 'power1.inOut', yoyo: true, repeat: 1 }, '>-0.05')
-            .call(() => {
-                // simulate copy only (no real clipboard write)
-                setCopied(true);
-            })
-            .to({}, { duration: 1.0 })
-            .call(() => setCopied(false));
+        tl.to(c1, { opacity: 1, x: 0, duration: 0.4, ease: 'none' })
+          .to(c1BtnRef.current, { scale: 0.96, duration: 0.08, ease: 'none', yoyo: true, repeat: 1 }, '>-0.02')
+          .to(c2, { opacity: 1, scale: 1, duration: 0.4, ease: 'none' })
+          .to(c3, { opacity: 1, duration: 0.4, ease: 'none' })
+          .to(c3GlowRef.current, { opacity: 1, duration: 0.25, ease: 'sine.inOut', yoyo: true, repeat: 1 }, '>-0.05')
+          .to(c3CopyBtnRef.current, { scale: 0.96, duration: 0.08, ease: 'none', yoyo: true, repeat: 1 }, '>-0.05');
 
         const st = ScrollTrigger.create({
             trigger: containerRef.current,
-            start: 'top 70%',
-            onEnter: () => tl.play(),
-            onLeaveBack: () => tl.reverse(),
-        });
+            start: 'top 12%',
+            end: '+=900',
+            pin: true,
+            anticipatePin: 2,
+            scrub: 0.2,
+            animation: tl,
+            onUpdate: (self) => {
+                const p = self.progress; // 0..1
 
-        tl.eventCallback('onReverseComplete', () => {
-            setSignInLoading(false);
-            setSelectedRepo(1);
-            setCopied(false);
-            if (c3GlowRef.current) gsap.set(c3GlowRef.current, { opacity: 0 });
+                // loading window for step 1
+                const wantLoading = p > 0.06 && p < 0.22;
+                setSignInLoading((prev) => (prev !== wantLoading ? wantLoading : prev));
+
+                // step 2 repo highlight bands
+                let wantRepo = 1;
+                if (p < 0.45) wantRepo = 2; else wantRepo = 1;
+                setSelectedRepo((prev) => (prev !== wantRepo ? wantRepo : prev));
+
+                // step 3 copied indicator; respect manual click override
+                if (Date.now() >= manualCopyUntilRef.current) {
+                    const wantCopied = p > 0.85;
+                    setCopied((prev) => (prev !== wantCopied ? wantCopied : prev));
+                }
+            },
         });
 
         return () => {
@@ -96,7 +94,7 @@ export default function HowItWorks() {
     }, []);
 
     return (
-        <div ref={containerRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div ref={containerRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
             <Reveal>
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-semibold text-white">How It Works</h2>
@@ -199,7 +197,8 @@ export default function HowItWorks() {
                                                     variant="bordered"
                                                     className="ml-auto"
                                                     onClick={() => {
-                                                        // simulate copy only
+                                                        // simulate copy only; give manual override window
+                                                        manualCopyUntilRef.current = Date.now() + 1200;
                                                         setCopied(true);
                                                         setTimeout(() => setCopied(false), 1200);
                                                     }}
