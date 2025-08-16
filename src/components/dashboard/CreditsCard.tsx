@@ -24,7 +24,7 @@ export default function CreditsCard({ session }: CreditsCardProps) {
                         as="a"
                         href="/dashboard/billing"
                     >
-                        Add Credits
+                        +
                     </Button>
                 </div>
             </CardBody>

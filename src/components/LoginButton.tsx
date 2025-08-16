@@ -11,10 +11,10 @@ export default function LoginButton() {
     setLoading(true);
     try {
       await signIn("github");
+      // Keep loading state until redirect happens - don't reset it
     } catch (error) {
       console.error("Error signing in:", error);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only reset on error
     }
   };
 

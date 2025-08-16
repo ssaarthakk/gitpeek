@@ -1,19 +1,17 @@
 'use client';
 
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { CustomUnderline } from '@/components/ui/custom-underline';
+import { FlipWords } from '@/components/ui/flip-words';
 
 interface HeroTitleProps {
   className?: string;
 }
 
 export const HeroTitle = ({ className = "" }: HeroTitleProps) => {
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showTitle, setShowTitle] = useState(false);
-  const switchingWords = ["Securely", "Temporarily"];
+  const words = ["Securely", "Temporarily", "Effortlessly", "Safely"];
 
-  // Show title first, then start word switching
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTitle(true);
@@ -21,17 +19,6 @@ export const HeroTitle = ({ className = "" }: HeroTitleProps) => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  // Switch between words after title is shown
-  useEffect(() => {
-    if (!showTitle) return;
-
-    const interval = setInterval(() => {
-      setCurrentWordIndex((prev) => (prev + 1) % switchingWords.length);
-    }, 2500); // Switch every 2.5 seconds
-
-    return () => clearInterval(interval);
-  }, [showTitle, switchingWords.length]);
 
   return (
     <div className={`text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-4 ${className}`}>
@@ -74,22 +61,12 @@ export const HeroTitle = ({ className = "" }: HeroTitleProps) => {
           <span>GitHub Repos</span>
         </div>
         
-        {/* Second line with switching words */}
         <div className="flex items-center justify-center gap-x-2 md:gap-x-3 min-h-[1.2em]">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={currentWordIndex}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="text-blue-500"
-            >
-              {switchingWords[currentWordIndex]}
-            </motion.span>
-          </AnimatePresence>
+          <span className="text-white">Instantly</span>
           <span>&</span>
-          <span className="text-blue-500">Instantly</span>
+          <span className="text-blue-500">
+            <FlipWords words={words} duration={2500} />
+          </span>
         </div>
       </motion.div>
     </div>

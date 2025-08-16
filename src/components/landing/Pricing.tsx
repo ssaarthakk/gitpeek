@@ -2,8 +2,47 @@
 
 import Link from 'next/link';
 import { Button, Card, CardBody, CardHeader, Divider } from '@heroui/react';
+import { useSession, signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Pricing() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [startFreeLoading, setStartFreeLoading] = useState(false);
+  const [buyCreditsLoading, setBuyCreditsLoading] = useState(false);
+
+  const handleStartFree = async () => {
+    setStartFreeLoading(true);
+    try {
+      if (session?.user) {
+        router.push('/dashboard/billing');
+        // Keep loading state until redirect happens
+      } else {
+        await signIn('github');
+        // Keep loading state until sign in completes
+      }
+    } catch (error) {
+      console.error('Error in handleStartFree:', error);
+      setStartFreeLoading(false);
+    }
+  };
+
+  const handleBuyCredits = async () => {
+    setBuyCreditsLoading(true);
+    try {
+      if (session?.user) {
+        router.push('/dashboard/billing');
+        // Keep loading state until redirect happens
+      } else {
+        await signIn('github');
+        // Keep loading state until sign in completes
+      }
+    } catch (error) {
+      console.error('Error in handleBuyCredits:', error);
+      setBuyCreditsLoading(false);
+    }
+  };
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-10">
@@ -23,8 +62,14 @@ export default function Pricing() {
             <ul className="text-sm text-white/80 list-disc pl-5 space-y-2">
               <li>1 Free Share Credits on Sign-Up</li>
             </ul>
-            <Button as={Link as any} href="/api/auth/signin" color="primary" className="mt-6 w-full font-semibold">
-              Start Free
+            <Button 
+              onPress={handleStartFree} 
+              color="primary" 
+              className="mt-6 w-full font-semibold"
+              isLoading={startFreeLoading}
+              isDisabled={startFreeLoading}
+            >
+              {session?.user ? 'Go to Billing' : 'Start Free'}
             </Button>
           </CardBody>
         </Card>
@@ -40,8 +85,14 @@ export default function Pricing() {
             <ul className="text-sm text-white/80 list-disc pl-5 space-y-2">
               <li>Purchase 5 additional credits anytime.</li>
             </ul>
-            <Button as={Link as any} href="/dashboard/billing" variant="bordered" className="mt-6 w-full font-semibold">
-              Buy Credits
+            <Button 
+              onPress={handleBuyCredits} 
+              variant="bordered" 
+              className="mt-6 w-full font-semibold"
+              isLoading={buyCreditsLoading}
+              isDisabled={buyCreditsLoading}
+            >
+              {session?.user ? 'Go to Billing' : 'Buy Credits'}
             </Button>
           </CardBody>
         </Card>
