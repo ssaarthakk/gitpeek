@@ -7,7 +7,7 @@ export default function Pricing() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-10">
-        <h2 className="text-2xl md:text-3xl font-semibold text-white">Pricing</h2>
+        <h2 className="text-3xl md:text-4xl font-semibold text-white">Pricing</h2>
         <p className="mt-2 text-white/70">Start free, only pay when you need more.</p>
       </div>
 

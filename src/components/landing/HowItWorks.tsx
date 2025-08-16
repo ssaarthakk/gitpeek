@@ -100,7 +100,7 @@ export default function HowItWorks() {
         <div ref={containerRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal>
                 <div className="text-center mb-10">
-                    <h2 className="text-2xl md:text-3xl font-semibold text-white">How It Works</h2>
+                    <h2 className="text-3xl md:text-4xl font-semibold text-white">How It Works</h2>
                     <p className="mt-2 text-white/70">A quick animated walkthrough of the flow.</p>
                 </div>
             </Reveal>
