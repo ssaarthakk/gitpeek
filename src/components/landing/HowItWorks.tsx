@@ -50,41 +50,44 @@ export default function HowItWorks() {
         gsap.set(c3, { opacity: 0 });
         if (c3GlowRef.current) gsap.set(c3GlowRef.current, { opacity: 0 });
 
-        // Build scroll-controlled timeline (no state .call here)
+        // Build timeline that plays when scrolled into view (simultaneous reveal)
         const tl = gsap.timeline({ paused: true });
-        tl.to(c1, { opacity: 1, x: 0, duration: 0.4, ease: 'none' })
-          .to(c1BtnRef.current, { scale: 0.96, duration: 0.08, ease: 'none', yoyo: true, repeat: 1 }, '>-0.02')
-          .to(c2, { opacity: 1, scale: 1, duration: 0.4, ease: 'none' })
-          .to(c3, { opacity: 1, duration: 0.4, ease: 'none' })
-          .to(c3GlowRef.current, { opacity: 1, duration: 0.25, ease: 'sine.inOut', yoyo: true, repeat: 1 }, '>-0.05')
-          .to(c3CopyBtnRef.current, { scale: 0.96, duration: 0.08, ease: 'none', yoyo: true, repeat: 1 }, '>-0.05');
+        tl.add('reveal');
 
+        // Reveal all three cards together (slower reveals)
+        tl.to(c1, { opacity: 1, x: 0, duration: 2, ease: 'power3.out' }, 'reveal')
+          .to(c2, { opacity: 1, scale: 1, duration: 2, ease: 'back.out(1.2)' }, 'reveal')
+          .to(c3, { opacity: 1, duration: 2, ease: 'power2.out' }, 'reveal')
+
+          // Micro interactions with tiny offsets so it feels alive
+          .call(() => setSignInLoading(true), undefined, 'reveal+=0.02')
+          .to(c1BtnRef.current, { scale: 0.96, duration: 0.12, ease: 'power1.inOut', yoyo: true, repeat: 1 }, 'reveal+=0.02')
+          .to({}, { duration: 0.5 })
+          .call(() => setSignInLoading(false))
+
+          .call(() => setSelectedRepo(2), undefined, 'reveal+=0.18')
+          .to({}, { duration: 0.2 })
+          .call(() => setSelectedRepo(1))
+
+          .to(c3GlowRef.current, { opacity: 1, duration: 0.3, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 'reveal+=0.22')
+          .to(c3CopyBtnRef.current, { scale: 0.96, duration: 0.1, ease: 'power1.inOut', yoyo: true, repeat: 1 }, 'reveal+=0.24')
+          .call(() => setCopied(true), undefined, 'reveal+=0.24')
+          .to({}, { duration: 1.0 })
+          .call(() => setCopied(false));
+
+        // Primary trigger: play/reverse based on viewport
         const st = ScrollTrigger.create({
             trigger: containerRef.current,
-            start: 'top 12%',
-            end: '+=900',
-            pin: true,
-            anticipatePin: 2,
-            scrub: 0.2,
-            animation: tl,
-            onUpdate: (self) => {
-                const p = self.progress; // 0..1
+            start: 'top 70%',
+            onEnter: () => tl.play(0),
+            onLeaveBack: () => tl.reverse(),
+        });
 
-                // loading window for step 1
-                const wantLoading = p > 0.06 && p < 0.22;
-                setSignInLoading((prev) => (prev !== wantLoading ? wantLoading : prev));
-
-                // step 2 repo highlight bands
-                let wantRepo = 1;
-                if (p < 0.45) wantRepo = 2; else wantRepo = 1;
-                setSelectedRepo((prev) => (prev !== wantRepo ? wantRepo : prev));
-
-                // step 3 copied indicator; respect manual click override
-                if (Date.now() >= manualCopyUntilRef.current) {
-                    const wantCopied = p > 0.85;
-                    setCopied((prev) => (prev !== wantCopied ? wantCopied : prev));
-                }
-            },
+        tl.eventCallback('onReverseComplete', () => {
+            setSignInLoading(false);
+            setSelectedRepo(1);
+            setCopied(false);
+            if (c3GlowRef.current) gsap.set(c3GlowRef.current, { opacity: 0 });
         });
 
         return () => {

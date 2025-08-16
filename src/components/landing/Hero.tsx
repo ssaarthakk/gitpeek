@@ -35,9 +35,9 @@ export default function Hero() {
             <Button as={Link as any} href="/api/auth/signin" size="lg" color="primary" className="px-6 font-semibold">
               Get Started for Free
             </Button>
-            <Button as={Link as any} href="#how-it-works" size="lg" variant="bordered" className="px-6">
+            {/* <Button as={Link as any} href="#how-it-works" size="lg" variant="bordered" className="px-6">
               How it works
-            </Button>
+            </Button> */}
           </div>
         </Reveal>
       </div>
