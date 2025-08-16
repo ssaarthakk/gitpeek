@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardBody } from '@heroui/react';
+import Reveal from '@/components/animations/Reveal';
 
 const features = [
   {
@@ -30,24 +31,28 @@ function PlaceholderIcon() {
 export default function Features() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-10">
-        <h2 className="text-2xl md:text-3xl font-semibold text-white">Features</h2>
-        <p className="mt-2 text-white/70">Everything you need to share private code with confidence.</p>
-      </div>
+      <Reveal>
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white">Features</h2>
+          <p className="mt-2 text-white/70">Everything you need to share private code with confidence.</p>
+        </div>
+      </Reveal>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {features.map((f) => (
-          <Card key={f.title} className="bg-white/5 border border-white/10">
-            <CardBody>
-              <div className="flex items-start gap-4">
-                <PlaceholderIcon />
-                <div>
-                  <h3 className="text-lg font-semibold text-white">{f.title}</h3>
-                  <p className="mt-1 text-sm text-white/70">{f.desc}</p>
+        {features.map((f, idx) => (
+          <Reveal key={f.title} delay={idx * 0.08}>
+            <Card className="bg-white/5 border border-white/10">
+              <CardBody>
+                <div className="flex items-start gap-4">
+                  <PlaceholderIcon />
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">{f.title}</h3>
+                    <p className="mt-1 text-sm text-white/70">{f.desc}</p>
+                  </div>
                 </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
+          </Reveal>
         ))}
       </div>
     </div>
