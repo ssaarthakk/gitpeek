@@ -10,17 +10,16 @@ export async function GET() {
     }
 
     try {
-        const res = await prisma.shareLink.findMany({
+        const links = await prisma.shareLink.findMany({
             where: {
                 userId: session.user.id,
             },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
 
-        if (res.length === 0) {
-            return new NextResponse(JSON.stringify({ error: "No links founds for your account" }), { status: 404 });
-        }
-
-        return new NextResponse(JSON.stringify(res), { status: 200 });
+        return new NextResponse(JSON.stringify(links), { status: 200 });
     } catch (error) {
         console.error("Failed to fetch links:", error);
         return new NextResponse(JSON.stringify({ error: "An unexpected error occurred." }), { status: 500 });

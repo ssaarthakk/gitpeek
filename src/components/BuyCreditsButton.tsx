@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
+import axios from 'axios';
 
 export default function BuyCreditsButton() {
   const [quantity, setQuantity] = useState(1);
@@ -10,15 +11,9 @@ export default function BuyCreditsButton() {
   const handleBuyCredits = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ quantity }),
-      });
+      const response = await axios.post('/api/checkout', { quantity });
 
-      const { url } = await response.json();
+      const { url } = response.data;
       if (url) {
         window.location.href = url;
       } else {

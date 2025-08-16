@@ -4,27 +4,20 @@ import MainContent from "@/components/landing/MainContent";
 import Navbar from "@/components/landing/Navbar";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import axios from "axios";
 
 export default function HomePage() {
   const { data: session, status } = useSession();
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
 
   const handleShare = async (repoFullName: string) => {
-    const response = await fetch('/api/share', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ repoFullName }),
-    });
+    try {
+      const response = await axios.post('/api/share', { repoFullName });
 
-    const data = await response.json();
-
-    if (response.ok) {
-      const fullLink = `${window.location.origin}/view/${data.id}`;
+      const fullLink = `${window.location.origin}/view/${response.data.id}`;
       return { link: fullLink };
-    } else {
-      return { error: data.error || "Failed to create link." };
+    } catch (error: any) {
+      return { error: error.response?.data?.error || "Failed to create link." };
     }
   };
 
