@@ -15,4 +15,19 @@ export const authConfig = {
     }),
   ],
   secret: process.env.AUTH_SECRET,
+  callbacks: {
+    authorized({ auth, request }) {
+      const { pathname } = request.nextUrl;
+      if (
+        pathname === '/' ||
+        pathname.startsWith('/pricing') ||
+        pathname.startsWith('/view') ||
+        pathname.startsWith('/_next') ||
+        pathname.startsWith('/public')
+      ) {
+        return true;
+      }
+      return !!auth;
+    },
+  },
 } satisfies NextAuthConfig;

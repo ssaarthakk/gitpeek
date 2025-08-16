@@ -18,8 +18,12 @@ export default function RepoContentView({ repoFullName, accessToken  }: RepoCont
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [selectedType, setSelectedType] = useState<'file' | 'dir' | null>(null);
 
-    // Left directory listing
-    const { content: leftContent, isLoading: isLeftLoading, error: leftError } = useRepoContent(repoFullName, path);
+    // Left directory listing (use provided token for incognito/public share views)
+    const { content: leftContent, isLoading: isLeftLoading, error: leftError } = useRepoContent(
+        repoFullName,
+        path,
+        accessToken
+    );
     // If right panel is showing a directory, fetch its contents
     const { content: rightDirContent, isLoading: isRightDirLoading, error: rightDirError } = useRepoContent(
         selectedType === 'dir' ? repoFullName : null,
