@@ -3,6 +3,7 @@ import "./globals.css";
 import Provider from "@/components/Provider";
 import dynamic from "next/dynamic";
 import ScrollProgress from "@/components/animations/ScrollProgress";
+import { ToastProvider } from "@/hooks/useToast";
 
 export const metadata: Metadata = {
   title: "Git Peek",
@@ -18,8 +19,10 @@ export default function RootLayout({
         <html lang="en" className="dark bg-[#0b0f14] text-[#f0f6fc]">
           <body className="flex flex-col min-h-screen w-screen overflow-x-hidden font-sans antialiased">
             <Provider>
-              {/* <ScrollProgress /> */}
-              {children}
+              <ToastProvider>
+                {/* <ScrollProgress /> */}
+                {children}
+              </ToastProvider>
             </Provider>
           </body>
         </html>

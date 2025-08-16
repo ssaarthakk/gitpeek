@@ -1,39 +1,59 @@
-"use client"
-import MainContent from '@/components/landing/MainContent';
-import Navbar from '@/components/landing/Navbar'
-import axios from 'axios';
+"use client";
 import { useSession } from 'next-auth/react';
-import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import DashboardNavbar from '@/components/dashboard/DashboardNavbar';
+import DashboardContent from '@/components/dashboard/DashboardContent';
+import { Skeleton } from '@heroui/skeleton';
 
-function page() {
-
+export default function DashboardPage() {
   const { data: session, status } = useSession();
-  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
-  const handleShare = async (repoFullName: string) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
-    try {
-      const response = await axios.post('/api/share', { repoFullName });
-      const fullLink = `${window.location.origin}/view/${response.data.id}`;
-      return { link: fullLink };
-    } catch (error: any) {
-      return { error: error.response?.data?.error || "Failed to create link." };
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session) {
+      router.push('/');
+      return;
     }
-  };
+    
+    setIsLoading(false);
+  }, [session, status, router]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
+  if (status === 'loading' || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0b0f14] text-[#e6edf3]">
+        <div className="border-b border-white/10 p-4">
+          <Skeleton className="h-12 w-full rounded-lg" />
+        </div>
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+            <div className="lg:col-span-3">
+              <Skeleton className="h-32 w-full rounded-lg" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Skeleton className="h-96 w-full rounded-lg" />
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
   }
 
   return (
-    <div className="flex flex-col flex-1 h-screen w-full overflow-hidden">
-      <Navbar
-        onRepoSelect={setSelectedRepo}
-        handleShare={handleShare}
-        selectedRepo={selectedRepo}
-      />
-      <MainContent selectedRepo={selectedRepo} />
+    <div className="min-h-screen bg-[#0b0f14] text-[#e6edf3]">
+      <DashboardNavbar session={session} />
+      <DashboardContent session={session} />
     </div>
-  )
+  );
 }
-
-export default page
