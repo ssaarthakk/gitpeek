@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 
 export default function HomePage() {
   return (
-    <main className="h-screen w-full bg-[#0b0f14] text-[#e6edf3]">
+    <main className="min-h-screen w-full bg-[#0b0f14] text-[#e6edf3]">
       <Header />
 
       {/* Hero */}

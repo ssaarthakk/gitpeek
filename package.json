@@ -12,6 +12,7 @@
     "@auth/prisma-adapter": "^2.10.0",
     "@heroui/breadcrumbs": "^2.2.20",
     "@heroui/button": "^2.2.24",
+    "@heroui/card": "^2.2.23",
     "@heroui/input": "^2.4.25",
     "@heroui/react": "^2.8.2",
     "@heroui/select": "^2.4.25",
