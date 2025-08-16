@@ -97,7 +97,7 @@ export default function HowItWorks() {
     }, []);
 
     return (
-        <div ref={containerRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
+        <div ref={containerRef} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Reveal>
                 <div className="text-center mb-10">
                     <h2 className="text-2xl md:text-3xl font-semibold text-white">How It Works</h2>

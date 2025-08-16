@@ -10,17 +10,17 @@ export default function HomePage() {
       <Header />
 
       {/* Hero */}
-      <section>
+      <section className="py-12 md:py-16 scroll-mt-24">
         <Hero />
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 md:py-24 scroll-mt-24">
+      <section id="how-it-works" className="py-12 md:py-16 scroll-mt-24">
         <HowItWorks />
       </section>
 
       {/* Features */}
-      <section id="features" className="py-16 md:py-24 scroll-mt-24">
+      <section id="features" className="py-12 md:py-16 scroll-mt-24">
         <Features />
       </section>
 
