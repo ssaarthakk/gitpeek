@@ -1,3 +1,4 @@
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -52,6 +53,10 @@ export function renderFileContent(filePath: string, content: string, rawBase64: 
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
+                        // Render paragraphs as divs to avoid invalid nesting like <pre> inside <p>
+                        p({ children }: { children?: React.ReactNode }) {
+                            return <div className="mb-4">{children}</div>;
+                        },
                         code({ node, inline, className, children, ...props }: { node: any; inline?: boolean; className?: string; children: any }) {
                             const match = /language-(\w+)/.exec(className || '');
                             const lang = match ? match[1] : undefined;
@@ -62,8 +67,8 @@ export function renderFileContent(filePath: string, content: string, rawBase64: 
                                 <SyntaxHighlighter
                                     style={githubDarkTheme as any}
                                     language={lang}
-                                    PreTag="div"
-                                    customStyle={{ margin: '0 0 16px', background: '#161b22', padding: '16px 18px', fontSize: '13px', borderRadius: '6px', border: '1px solid #30363d' }}
+                                    PreTag="pre"
+                                    customStyle={{ margin: '0 0 16px', background: '#161b22', padding: '16px 18px', fontSize: '13px', borderRadius: '6px', border: '1px solid #30363d', overflowX: 'auto' }}
                                     showLineNumbers
                                     lineNumberStyle={{ color: '#6e7681', fontSize: '11px', paddingRight: '12px' }}
                                 >{String(children).replace(/\n$/, '')}</SyntaxHighlighter>

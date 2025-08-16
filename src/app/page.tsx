@@ -3,8 +3,15 @@ import Hero from "@/components/landing/Hero";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Features from "@/components/landing/Features";
 import Footer from "@/components/Footer";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+  if (session?.user) {
+    redirect("/dashboard");
+  }
+
   return (
     <main className="min-h-screen w-full bg-[#0b0f14] text-[#e6edf3]">
       <Header />
