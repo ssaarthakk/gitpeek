@@ -8,7 +8,7 @@ import prisma from '@/lib/prisma';
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.redirect(new URL('/api/auth/signin', request.url));
+    return NextResponse.redirect('/');
   }
 
   const { searchParams } = new URL(request.url);
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
     // Import InstallationAuth type from @octokit/auth-app
     // @ts-ignore-next-line: Type import for InstallationAuth
-    import type { InstallationAuth } from '@octokit/auth-app';
+    // import type { InstallationAuth } from '@octokit/auth-app';
 
     const { token } = await appOctokit.auth({ type: 'installation' }) as InstallationAuth;
 

@@ -11,22 +11,6 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const { isInstalled, isLoading: loadingInstall, redirectToInstallation } = useGitHubInstallation();
-
-  if (loadingInstall) {
-    return <p>Checking your setup...</p>;
-  }
-
-  if (!isInstalled) {
-    return (
-      <div>
-        <h1>Welcome to Git Peek</h1>
-        <p>To continue, you need to install the Git Peek app on your repositories.</p>
-        <button onClick={redirectToInstallation}>Install GitHub App</button>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (status === 'loading') return;
 
@@ -37,6 +21,22 @@ export default function DashboardPage() {
 
     setIsLoading(false);
   }, [session, status, router]);
+  
+  const { isInstalled, isLoading: loadingInstall, redirectToInstallation } = useGitHubInstallation();
+  if (loadingInstall) {
+    return <p>Checking your setup...</p>;
+  }
+  
+  if (!isInstalled) {
+    return (
+      <div>
+        <h1>Welcome to Git Peek</h1>
+        <p>To continue, you need to install the Git Peek app on your repositories.</p>
+        <button onClick={redirectToInstallation}>Install GitHub App</button>
+      </div>
+    );
+  }
+  
 
   if (status === 'loading' || isLoading) {
     return (
