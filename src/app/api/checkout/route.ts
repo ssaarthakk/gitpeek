@@ -27,11 +27,11 @@ export async function POST(request: Request) {
                 {
                     price: process.env.STRIPE_PRICE_ID!,
                     quantity: quantity,
-                    adjustable_quantity: {
-                        enabled: true,
-                        minimum: 1,
-                        maximum: 100,
-                    },
+                    // adjustable_quantity: {
+                    //     enabled: false,
+                    //     minimum: 1,
+                    //     maximum: 100,
+                    // },
                 },
             ],
             // This metadata is CRITICAL for our webhook later

@@ -30,6 +30,7 @@
     "@heroui/tooltip": "^2.2.21",
     "@heroui/user": "^2.2.20",
     "@neondatabase/serverless": "^1.0.1",
+    "@octokit/auth-app": "^8.0.2",
     "@octokit/core": "^7.0.3",
     "@octokit/types": "^14.1.0",
     "@primer/octicons-react": "^19.9.0",

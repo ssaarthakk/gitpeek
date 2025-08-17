@@ -33,6 +33,8 @@ model Account {
   scope              String?
   id_token           String? 
   session_state      String?
+  installation_id    String?
+  installation_token String? @db.Text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

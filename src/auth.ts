@@ -32,6 +32,19 @@ export const {
       session.accessToken = token.accessToken as string;
       return session;
     },
+    authorized({ auth, request }) {
+      const { pathname } = request.nextUrl;
+      if (
+        pathname === '/' ||
+        pathname.startsWith('/pricing') ||
+        pathname.startsWith('/view') ||
+        pathname.startsWith('/_next') ||
+        pathname.startsWith('/public')
+      ) {
+        return true;
+      }
+      return !!auth;
+    }
   },
   adapter: PrismaAdapter(prisma),
 });

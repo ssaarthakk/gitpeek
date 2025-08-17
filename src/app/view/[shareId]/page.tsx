@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import RepoContentView from "@/components/RepoContentView";
+import { getFreshAccessToken } from "@/lib/github";
 
 export default async function SharePageView({ params }: { params: { shareId: string } }) {
 
@@ -9,12 +10,8 @@ export default async function SharePageView({ params }: { params: { shareId: str
         where: { id: shareId },
     });
 
-    if (!shareLink) {
+    if (!shareLink || (shareLink.expiresAt && shareLink.expiresAt < new Date())) {
         return <h1>Link not found or has expired.</h1>;
-    }
-
-    if (shareLink.expiresAt && shareLink.expiresAt < new Date()) {
-        return <h1>This link has expired.</h1>;
     }
 
     const account = await prisma.account.findFirst({
@@ -28,14 +25,14 @@ export default async function SharePageView({ params }: { params: { shareId: str
         return <h1>Could not retrieve permission to view this repository.</h1>;
     }
 
-    const accessToken = account.access_token;
+    const freshAccessToken = await getFreshAccessToken(account);
     const repoFullName = shareLink.repoFullName;
 
     return (
         <main className="flex h-screen w-screen">
             <RepoContentView
                 repoFullName={repoFullName}
-                accessToken={accessToken}
+                accessToken={freshAccessToken}
             />
         </main>
     );

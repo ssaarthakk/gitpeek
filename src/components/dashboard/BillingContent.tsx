@@ -76,9 +76,9 @@ export default function BillingContent({ session }: BillingContentProps) {
 
         {/* Current Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-white/5 border border-white/10">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
+          <Card className="bg-white/5 border border-white/10 flex items-center justify-center">
+            <CardHeader className="pb-3 px-8">
+              <div className="flex items-center justify-center gap-3">
                 <Avatar
                   src={session.user?.image || undefined}
                   name={session.user?.name || 'User'}
