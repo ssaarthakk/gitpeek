@@ -14,5 +14,29 @@ export const authConfig = {
       },
     }),
   ],
+  pages: {
+    signIn: '/auth/signin',
+  },
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.includes('callbackUrl')) {
+        const callbackUrl = new URL(url).searchParams.get('callbackUrl');
+        if (callbackUrl?.includes('/pricing')) {
+          return `${baseUrl}/dashboard/billing`;
+        }
+        if (callbackUrl?.includes('/dashboard/billing')) {
+          return `${baseUrl}/dashboard/billing`;
+        }
+        if (callbackUrl?.includes('/dashboard')) {
+          return `${baseUrl}/dashboard`;
+        }
+      }
+
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+      return `${baseUrl}/dashboard`;
+    },
+  },
   secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { Button, Card, CardBody, CardHeader, Divider } from '@heroui/react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -16,11 +15,9 @@ export default function Pricing() {
     setStartFreeLoading(true);
     try {
       if (session?.user) {
-        router.push('/dashboard/billing');
-        // Keep loading state until redirect happens
+        router.push('/dashboard');
       } else {
-        await signIn('github');
-        // Keep loading state until sign in completes
+        await signIn('github', { callbackUrl: '/dashboard' });
       }
     } catch (error) {
       console.error('Error in handleStartFree:', error);
@@ -33,10 +30,8 @@ export default function Pricing() {
     try {
       if (session?.user) {
         router.push('/dashboard/billing');
-        // Keep loading state until redirect happens
       } else {
-        await signIn('github');
-        // Keep loading state until sign in completes
+        await signIn('github', { callbackUrl: '/dashboard/billing' });
       }
     } catch (error) {
       console.error('Error in handleBuyCredits:', error);
@@ -45,13 +40,8 @@ export default function Pricing() {
   };
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      {/* <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-semibold text-white">Pricing</h2>
-        <p className="mt-2 text-white/70">Start free, only pay when you need more.</p>
-      </div> */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Starter */}
+
         <Card className="bg-white/5 border border-white/10">
           <CardHeader className="flex flex-col items-start">
             <h3 className="text-xl font-semibold text-white">Starter</h3>
@@ -69,12 +59,11 @@ export default function Pricing() {
               isLoading={startFreeLoading}
               isDisabled={startFreeLoading}
             >
-              {session?.user ? 'Go to Billing' : 'Start Free'}
+              {session?.user ? 'Go to Dashboard' : 'Start Free'}
             </Button>
           </CardBody>
         </Card>
 
-        {/* Pay As You Go */}
         <Card className="bg-white/5 border border-white/10">
           <CardHeader className="flex flex-col items-start">
             <h3 className="text-xl font-semibold text-white">Pay As You Go</h3>
