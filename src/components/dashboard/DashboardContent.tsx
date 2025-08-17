@@ -17,6 +17,9 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 
 type DashboardContentProps = {
     session: Session;
+    isInstalled: boolean;
+    isLoadingInstall: boolean;
+    redirectToInstallation: () => void;
 };
 
 type ShareLink = {
@@ -26,7 +29,12 @@ type ShareLink = {
     expiresAt: string | null;
 };
 
-export default function DashboardContent({ session }: DashboardContentProps) {
+export default function DashboardContent({ 
+    session, 
+    isInstalled, 
+    isLoadingInstall, 
+    redirectToInstallation 
+}: DashboardContentProps) {
     const { repos, isLoading: reposLoading } = useRepos();
     const toast = useToast();
     const [shareLinks, setShareLinks] = useState<ShareLink[]>([]);
@@ -155,6 +163,9 @@ export default function DashboardContent({ session }: DashboardContentProps) {
                     selectedRepo={selectedRepo}
                     setSelectedRepo={setSelectedRepo}
                     onCreateShareLink={handleCreateShareLink}
+                    isInstalled={isInstalled}
+                    isLoadingInstall={isLoadingInstall}
+                    redirectToInstallation={redirectToInstallation}
                 />
 
                 <ShareLinksTable

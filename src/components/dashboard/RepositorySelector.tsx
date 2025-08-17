@@ -11,6 +11,7 @@ import {
     Skeleton, 
     Spacer 
 } from '@heroui/react';
+import { useState } from 'react';
 import { Session } from 'next-auth';
 import { Endpoints } from '@octokit/types';
 
@@ -25,6 +26,9 @@ type RepositorySelectorProps = {
     selectedRepo: string;
     setSelectedRepo: (repo: string) => void;
     onCreateShareLink: () => void;
+    isInstalled: boolean;
+    isLoadingInstall: boolean;
+    redirectToInstallation: () => void;
 };
 
 export default function RepositorySelector({
@@ -35,8 +39,26 @@ export default function RepositorySelector({
     setSearchQuery,
     selectedRepo,
     setSelectedRepo,
-    onCreateShareLink
+    onCreateShareLink,
+    isInstalled,
+    isLoadingInstall,
+    redirectToInstallation
 }: RepositorySelectorProps) {
+    const [installLoading, setInstallLoading] = useState(false);
+
+    const handleInstallClick = () => {
+        setInstallLoading(true);
+        try {
+            const maybe = redirectToInstallation() as unknown;
+            // If a promise is returned, keep loading until navigation or failure
+            if (typeof (maybe as any)?.then === 'function') {
+                (maybe as Promise<unknown>).catch(() => setInstallLoading(false));
+            }
+        } catch {
+            setInstallLoading(false);
+        }
+    };
+
     const filteredRepos = repos.filter(repo =>
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         repo.full_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -48,22 +70,57 @@ export default function RepositorySelector({
                 <h3 className="text-xl font-semibold text-white">Your Repositories</h3>
             </CardHeader>
             <CardBody className="space-y-4">
-                <Input
-                    placeholder="Search repositories..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    startContent={
-                        <svg className="h-4 w-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    }
-                    classNames={{
-                        input: "text-white",
-                        inputWrapper: "bg-white/10 border-white/20"
-                    }}
-                />
+                {isLoadingInstall ? (
+                    <div className="text-center py-8">
+                        <p className="text-white/70">Checking your GitHub App installation...</p>
+                    </div>
+                ) : !isInstalled ? (
+                    <div className="text-center py-8 space-y-4">
+                        <div className="mx-auto w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mb-4">
+                            <svg className="h-8 w-8 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
+                        </div>
+                        <h4 className="text-lg font-semibold text-white">Install GitHub App</h4>
+                        <p className="text-white/70 max-w-md mx-auto">
+                            To start sharing your repositories, you need to install the Git Peek app on your GitHub account.
+                        </p>
+                        <Button
+                            color="primary"
+                            size="lg"
+                            onPress={handleInstallClick}
+                            isLoading={installLoading}
+                            isDisabled={installLoading}
+                            className="font-semibold"
+                            startContent={
+                                !installLoading && (
+                                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                    </svg>
+                                )
+                            }
+                        >
+                            {installLoading ? 'Installing...' : 'Install GitHub App'}
+                        </Button>
+                    </div>
+                ) : (
+                    <>
+                        <Input
+                            placeholder="Search repositories..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            startContent={
+                                <svg className="h-4 w-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            }
+                            classNames={{
+                                input: "text-white",
+                                inputWrapper: "bg-white/10 border-white/20"
+                            }}
+                        />
 
-                {reposLoading ? (
+                        {reposLoading ? (
                     <div className="space-y-2">
                         {[...Array(5)].map((_, i) => (
                             <Skeleton key={i} className="h-16 w-full rounded-lg" />
@@ -114,19 +171,21 @@ export default function RepositorySelector({
                             ))}
                         </Listbox>
                     </div>
+                        )}
+
+                        <Spacer y={2} />
+
+                        <Button
+                            color="primary"
+                            size="lg"
+                            onPress={onCreateShareLink}
+                            isDisabled={!selectedRepo || (session.user?.credits || 0) <= 0}
+                            className="w-full"
+                        >
+                            Create Share Link ({session.user?.credits || 0} credits)
+                        </Button>
+                    </>
                 )}
-
-                <Spacer y={2} />
-
-                <Button
-                    color="primary"
-                    size="lg"
-                    onPress={onCreateShareLink}
-                    isDisabled={!selectedRepo || (session.user?.credits || 0) <= 0}
-                    className="w-full"
-                >
-                    Create Share Link ({session.user?.credits || 0} credits)
-                </Button>
             </CardBody>
         </Card>
     );
