@@ -28,6 +28,13 @@ export const {
         if (userFromDb) {
           session.user.credits = userFromDb.credits;
         }
+
+        const account = await prisma.account.findFirst({
+          where: { userId: token.id as string, provider: 'github' },
+        });
+        if (account) {
+          session.user.installationId = account.installation_id;
+        }
       }
       session.accessToken = token.accessToken as string;
       return session;

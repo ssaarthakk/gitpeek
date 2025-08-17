@@ -1,4 +1,3 @@
-// app/api/github/setup/route.ts
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { Octokit } from '@octokit/core';
@@ -19,7 +18,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Authenticate as the app to get an installation token
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
@@ -29,11 +27,7 @@ export async function GET(request: Request) {
       },
     });
 
-    // Import InstallationAuth type from @octokit/auth-app
-    // @ts-ignore-next-line: Type import for InstallationAuth
-    // import type { InstallationAuth } from '@octokit/auth-app';
-
-    const { token } = await appOctokit.auth({ type: 'installation' });
+    const { token }: any = await appOctokit.auth({ type: 'installation' });
 
     await prisma.account.updateMany({
       where: { userId: session.user.id, provider: 'github' },
