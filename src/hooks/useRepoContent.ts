@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Octokit } from '@octokit/core';
 import { Endpoints } from '@octokit/types';
+import useOctokit from '@/hooks/useOctokit';
 
 type RepoContent = Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['response']['data'];
 
 export default function useRepoContent(repoFullName: string | null, path: string = '', providedToken?: string) {
   const { data: session } = useSession();
+  const octokit = useOctokit(session?.accessToken);
   const [content, setContent] = useState<RepoContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,10 +26,10 @@ export default function useRepoContent(repoFullName: string | null, path: string
         setContent(cacheRef.current[key]);
         return;
       }
+      if (!octokit) return;
       try {
         setIsLoading(true);
         setError(null);
-        const octokit = new Octokit({ auth: accessToken });
         const [owner, repo] = repoFullName.split('/');
         const endpoint = path ? 'GET /repos/{owner}/{repo}/contents/{path}' : 'GET /repos/{owner}/{repo}/contents';
         const params: any = { owner, repo };

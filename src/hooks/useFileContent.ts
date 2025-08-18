@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Octokit } from '@octokit/core';
+import useOctokit from '@/hooks/useOctokit';
 
 type FileContentResult = {
   content: string | null; // decoded (utf-8) text when applicable
@@ -12,6 +12,7 @@ type FileContentResult = {
 
 export default function useFileContent(repoFullName: string, filePath: string | null, providedToken?: string): FileContentResult {
   const { data: session } = useSession();
+  const octokit = useOctokit(session?.accessToken);
   const [content, setContent] = useState<string | null>(null);
   const [raw, setRaw] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +29,8 @@ export default function useFileContent(repoFullName: string, filePath: string | 
           setRaw(cacheRef.current[key].raw);
           return;
         }
+        if (!octokit) return;
         setIsLoading(true);
-        const octokit = new Octokit({ auth: accessToken });
         const [owner, repo] = repoFullName.split('/');
         try {
           const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path: filePath });
@@ -54,7 +55,7 @@ export default function useFileContent(repoFullName: string, filePath: string | 
     };
 
     fetchFile();
-  }, [filePath, repoFullName, session, key]);
+  }, [filePath, repoFullName, session, key, octokit]);
 
   return { content, raw, isLoading };
 }

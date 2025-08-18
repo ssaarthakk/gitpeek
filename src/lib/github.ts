@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
-import { Octokit } from "@octokit/core";
 import { Account } from "@prisma/client";
 import axios from "axios";
+import useOctokit from '@/hooks/useOctokit';
 
 export async function getFreshAccessToken(account: Account) {
     if (!account.expires_at || !account.refresh_token) {
@@ -56,18 +56,23 @@ export async function getFreshAccessToken(account: Account) {
 }
 
 export async function ensureInstallation(userAccessToken: string) {
-  const octokit = new Octokit({ auth: userAccessToken });
-  const { data } = await octokit.request("GET /user/installations");
+    const octokit = useOctokit(userAccessToken);
+    if (!octokit) {
+        return {
+            redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
+        };
+    }
+    const { data } = await octokit.request("GET /user/installations");
 
-  const installation = data.installations.find(
-    (i) => i.app_slug === process.env.GITHUB_APP_SLUG
-  );
+    const installation = data.installations.find(
+        (i) => i.app_slug === process.env.GITHUB_APP_SLUG
+    );
 
-  if (!installation) {
-    return {
-      redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
-    };
-  }
+    if (!installation) {
+        return {
+            redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
+        };
+    }
 
-  return { ok: true, installation };
+    return { ok: true, installation };
 }
