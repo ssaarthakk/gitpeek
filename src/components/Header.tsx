@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { signIn, useSession } from 'next-auth/react';
 import { useSignInLoading } from '@/components/landing/SignInLoadingContext';
+import Image from 'next/image';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -23,6 +24,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0b0f14]/80 backdrop-blur supports-[backdrop-filter]:bg-[#0b0f14]/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
+          <Image src="/GitPeek.png" alt="Git Peek" className="h-8 w-8" width={20} height={20} />
           <span className="text-lg font-semibold tracking-tight text-white">Git Peek</span>
         </Link>
 
