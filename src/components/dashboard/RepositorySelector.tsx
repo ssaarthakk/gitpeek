@@ -28,7 +28,7 @@ type RepositorySelectorProps = {
     onCreateShareLink: () => void;
     isInstalled: boolean;
     isLoadingInstall: boolean;
-    redirectToInstallation: () => void;
+    openInstallationWindow: () => void;
 };
 
 export default function RepositorySelector({
@@ -42,14 +42,14 @@ export default function RepositorySelector({
     onCreateShareLink,
     isInstalled,
     isLoadingInstall,
-    redirectToInstallation
+    openInstallationWindow
 }: RepositorySelectorProps) {
     const [installLoading, setInstallLoading] = useState(false);
 
     const handleInstallClick = () => {
         setInstallLoading(true);
         try {
-            const maybe = redirectToInstallation() as unknown;
+            const maybe = openInstallationWindow() as unknown;
             // If a promise is returned, keep loading until navigation or failure
             if (typeof (maybe as any)?.then === 'function') {
                 (maybe as Promise<unknown>).catch(() => setInstallLoading(false));

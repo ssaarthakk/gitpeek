@@ -1,18 +1,39 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
 const GITHUB_APP_SLUG = 'git-peek';
 
 export default function useGitHubInstallation() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   const isInstalled = !!session?.user?.installationId;
   const isLoading = status === 'loading';
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.data === 'github_installation_success') {
+        // await signOut({ redirect: false });
+        await signIn('github');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [session]);
 
   const redirectToInstallation = () => {
     window.location.href = `https://github.com/apps/${GITHUB_APP_SLUG}/installations/new`;
   };
 
-  return { isInstalled, isLoading, redirectToInstallation };
+  const openInstallationWindow = () => {
+    const installUrl = `https://github.com/apps/${GITHUB_APP_SLUG}/installations/new`;
+    window.open(installUrl, 'GitHub App Installation', 'width=800,height=700');
+  };
+
+  return { isInstalled, isLoading, openInstallationWindow };
 }

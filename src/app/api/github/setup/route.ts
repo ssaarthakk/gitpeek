@@ -37,6 +37,25 @@ export async function GET(request: Request) {
       },
     });
 
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head><title>Installation Success</title></head>
+        <body>
+          <p>Installation successful! Closing...</p>
+          <script>
+            // Send the success message to the main window
+            if (window.opener) {
+              window.opener.postMessage('github_installation_success', '*');
+            }
+            window.close();
+          </script>
+        </body>
+      </html>
+    `;
+
+    return new Response(html, { headers: { 'Content-Type': 'text/html' } });
+
   } catch (error) {
     console.error("Failed to create installation token:", error);
     return NextResponse.redirect(new URL('/dashboard?error=setup_failed', request.url));

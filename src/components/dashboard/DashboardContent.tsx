@@ -19,7 +19,7 @@ type DashboardContentProps = {
     session: Session;
     isInstalled: boolean;
     isLoadingInstall: boolean;
-    redirectToInstallation: () => void;
+    openInstallationWindow: () => void;
 };
 
 type ShareLink = {
@@ -33,7 +33,7 @@ export default function DashboardContent({
     session, 
     isInstalled, 
     isLoadingInstall, 
-    redirectToInstallation 
+    openInstallationWindow 
 }: DashboardContentProps) {
     const { repos, isLoading: reposLoading } = useRepos();
     const toast = useToast();
@@ -165,7 +165,7 @@ export default function DashboardContent({
                     onCreateShareLink={handleCreateShareLink}
                     isInstalled={isInstalled}
                     isLoadingInstall={isLoadingInstall}
-                    redirectToInstallation={redirectToInstallation}
+                    openInstallationWindow={openInstallationWindow}
                 />
 
                 <ShareLinksTable

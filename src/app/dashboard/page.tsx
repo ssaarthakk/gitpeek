@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const { isInstalled, isLoading: loadingInstall, redirectToInstallation } = useGitHubInstallation();
+  const { isInstalled, isLoading: loadingInstall, openInstallationWindow } = useGitHubInstallation();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -59,7 +59,7 @@ export default function DashboardPage() {
         session={session} 
         isInstalled={isInstalled}
         isLoadingInstall={loadingInstall}
-        redirectToInstallation={redirectToInstallation}
+        openInstallationWindow={openInstallationWindow}
       />
     </div>
   );
