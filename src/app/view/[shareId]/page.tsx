@@ -11,7 +11,11 @@ export default async function SharePageView({ params }: { params: { shareId: str
     });
 
     if (!shareLink || (shareLink.expiresAt && shareLink.expiresAt < new Date())) {
-        return <h1>Link not found or has expired.</h1>;
+        return (
+            <div className="flex h-screen w-screen items-center justify-center">
+                <h1 className="font-bold text-2xl">Link not found or has expired. Please request a new link.</h1>
+            </div>
+        );
     }
 
     const account = await prisma.account.findFirst({
@@ -22,7 +26,11 @@ export default async function SharePageView({ params }: { params: { shareId: str
     });
 
     if (!account?.installation_token) {
-        return <h1>Could not retrieve permission to view this repository.</h1>;
+        return (
+            <div className="flex h-screen w-screen items-center justify-center">
+                <h1 className="font-bold text-2xl">Could not retrieve permission to view this repository.</h1>
+            </div>
+        );
     }
 
     try {
@@ -37,6 +45,30 @@ export default async function SharePageView({ params }: { params: { shareId: str
             </main>
         );
     } catch (error) {
-        return <h1>Could not retrieve permission to view this repository.</h1>;
+        if (
+            typeof error === "object" &&
+            error !== null &&
+            "message" in error &&
+            typeof (error as { message?: unknown }).message === "string" &&
+            (error as { message: string }).message.includes("Could not create GitHub installation token")
+        ) {
+            await prisma.account.update({
+                where: { id: account.id },
+                data: {
+                    installation_id: null,
+                    installation_token: null,
+                },
+            });
+            return (
+                <div className="flex h-screen w-screen items-center justify-center">
+                    <h1 className="font-bold text-2xl">Access has been revoked. The link is no longer valid.</h1>
+                </div>
+            );
+        }
+        return (
+            <div className="flex h-screen w-screen items-center justify-center">
+                <h1 className="font-bold text-2xl">Could not retrieve permission to view this repository.</h1>
+            </div>
+        );
     }
 }
