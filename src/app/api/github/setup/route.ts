@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { Octokit } from '@octokit/core';
-import { createAppAuth } from '@octokit/auth-app';
 import prisma from '@/lib/prisma';
+import { createInstallationToken } from '@/lib/github';
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -18,16 +17,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const appOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId: process.env.GITHUB_APP_ID!,
-        privateKey: process.env.GITHUB_PRIVATE_KEY!.replace(/\\n/g, '\n'),
-        installationId: installationId,
-      },
-    });
-
-    const { token }: any = await appOctokit.auth({ type: 'installation' });
+    const token = await createInstallationToken(installationId);
 
     await prisma.account.updateMany({
       where: { userId: session.user.id, provider: 'github' },

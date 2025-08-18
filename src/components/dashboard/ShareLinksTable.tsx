@@ -15,6 +15,7 @@ import {
     Skeleton
 } from '@heroui/react';
 import { useToast } from '@/hooks/useToast';
+import Link from 'next/link';
 
 type ShareLink = {
     id: string;
@@ -87,7 +88,7 @@ export default function ShareLinksTable({
                             {shareLinks.map((link) => (
                                 <TableRow key={link.id}>
                                     <TableCell>
-                                        <div className="font-mono text-sm">{link.repoFullName}</div>
+                                        <Link href={`${window.location.origin}/view/${link.id}`} target='_blank' className="font-mono text-sm hover:underline">{link.repoFullName}</Link>
                                     </TableCell>
                                     <TableCell>
                                         <Chip

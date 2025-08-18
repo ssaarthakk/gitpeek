@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import RepoContentView from "@/components/RepoContentView";
-import { getFreshAccessToken } from "@/lib/github";
+import { createInstallationToken } from '@/lib/github';
 
 export default async function SharePageView({ params }: { params: { shareId: string } }) {
 
@@ -25,15 +25,18 @@ export default async function SharePageView({ params }: { params: { shareId: str
         return <h1>Could not retrieve permission to view this repository.</h1>;
     }
 
-    const freshAccessToken = account.installation_token;
-    const repoFullName = shareLink.repoFullName;
+    try {
+        const freshInstallationToken = await createInstallationToken(account.installation_id!);
 
-    return (
-        <main className="flex h-screen w-screen">
-            <RepoContentView
-                repoFullName={repoFullName}
-                accessToken={freshAccessToken}
-            />
-        </main>
-    );
+        return (
+            <main className="flex h-screen w-screen">
+                <RepoContentView
+                    repoFullName={shareLink.repoFullName}
+                    accessToken={freshInstallationToken}
+                />
+            </main>
+        );
+    } catch (error) {
+        return <h1>Could not retrieve permission to view this repository.</h1>;
+    }
 }

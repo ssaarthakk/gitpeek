@@ -2,6 +2,8 @@ import prisma from "@/lib/prisma";
 import { Account } from "@prisma/client";
 import axios from "axios";
 import useOctokit from '@/hooks/useOctokit';
+import { Octokit } from "@octokit/core";
+import { createAppAuth } from "@octokit/auth-app";
 
 export async function getFreshAccessToken(account: Account) {
     if (!account.expires_at || !account.refresh_token) {
@@ -53,6 +55,25 @@ export async function getFreshAccessToken(account: Account) {
         console.error("Failed to refresh access token:", error);
         return account.access_token;
     }
+}
+
+export async function createInstallationToken(installationId: string) {
+  try {
+    const appOctokit = new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId: process.env.GITHUB_APP_ID!,
+        privateKey: process.env.GITHUB_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        installationId: installationId,
+      },
+    });
+
+    const { token } = await appOctokit.auth({ type: 'installation' }) as { token: string };
+    return token;
+  } catch (error) {
+    console.error("Failed to create installation token:", error);
+    throw new Error("Could not create GitHub installation token.");
+  }
 }
 
 export async function ensureInstallation(userAccessToken: string) {
