@@ -1,13 +1,11 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { Octokit } from '@octokit/core';
 import api from '@/lib/api';
 import { useMemo } from 'react';
 
 export default function useOctokit(providedToken?: string) {
-  const { data: session } = useSession();
-  const accessToken = providedToken || session?.accessToken;
+  const accessToken = providedToken;
 
   const octokit = useMemo(() => {
 

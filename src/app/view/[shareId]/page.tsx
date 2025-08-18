@@ -21,11 +21,11 @@ export default async function SharePageView({ params }: { params: { shareId: str
         },
     });
 
-    if (!account?.access_token) {
+    if (!account?.installation_token) {
         return <h1>Could not retrieve permission to view this repository.</h1>;
     }
 
-    const freshAccessToken = await getFreshAccessToken(account);
+    const freshAccessToken = account.installation_token;
     const repoFullName = shareLink.repoFullName;
 
     return (

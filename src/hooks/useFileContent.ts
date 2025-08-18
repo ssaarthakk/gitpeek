@@ -12,7 +12,7 @@ type FileContentResult = {
 
 export default function useFileContent(repoFullName: string, filePath: string | null, providedToken?: string): FileContentResult {
   const { data: session } = useSession();
-  const octokit = useOctokit(session?.accessToken);
+  const octokit = useOctokit(providedToken || session?.accessToken);
   const [content, setContent] = useState<string | null>(null);
   const [raw, setRaw] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

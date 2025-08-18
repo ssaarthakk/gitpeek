@@ -9,7 +9,7 @@ type RepoContent = Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['respo
 
 export default function useRepoContent(repoFullName: string | null, path: string = '', providedToken?: string) {
   const { data: session } = useSession();
-  const octokit = useOctokit(session?.accessToken);
+  const octokit = useOctokit(providedToken || session?.accessToken);
   const [content, setContent] = useState<RepoContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function useRepoContent(repoFullName: string | null, path: string
     };
 
     fetchContent();
-  }, [repoFullName, path, session, key, providedToken]);
+  }, [repoFullName, path, session, key, providedToken, octokit]);
 
   return { content, isLoading, error };
 }
