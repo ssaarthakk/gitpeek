@@ -45,11 +45,14 @@ export default function Hero() {
             <div className="mt-10 flex items-center justify-center gap-3">
               {session?.user ? (
                 <Button 
-                  as={Link}
-                  href="/dashboard"
+                  // as={Link}
+                  // href="/dashboard"
                   size="lg" 
                   color="primary" 
                   className="px-7 md:px-8 font-semibold"
+                  onPress={handleSignIn}
+                  isLoading={isSignInLoading}
+                  isDisabled={isSignInLoading}
                 >
                   Go to Dashboard
                 </Button>

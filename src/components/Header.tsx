@@ -30,8 +30,11 @@ export default function Header() {
           <Button as={Link as any} href="/pricing" variant="flat" className="text-sm">Pricing</Button>
           {session?.user ? (
             <Button
-              as={Link as any}
-              href="/dashboard"
+              // as={Link as any}
+              // href="/dashboard"
+              onPress={handleSignIn}
+              isLoading={isSignInLoading}
+              isDisabled={isSignInLoading}
               color="primary"
               className="text-sm font-semibold"
             >
