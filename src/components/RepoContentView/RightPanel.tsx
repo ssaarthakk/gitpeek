@@ -1,5 +1,5 @@
 import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
-import { CodeSkeleton, RightDirSkeleton } from "./Skeletons";
+import ContentLoadingBar from "./ContentLoadingBar";
 import { renderFileContent } from "./FileRenderer";
 
 type RightPanelProps = {
@@ -35,7 +35,8 @@ export default function RightPanel({
         : [];
 
     return (
-        <div className="flex-1 flex flex-col rounded-xl bg-white/[0.04] backdrop-blur-md shadow-[0_4px_22px_-6px_rgba(0,0,0,0.55)] overflow-hidden ring-1 ring-white/5 min-h-[320px]">
+        <div className="flex-1 flex flex-col rounded-xl bg-white/[0.04] backdrop-blur-md shadow-[0_4px_22px_-6px_rgba(0,0,0,0.55)] overflow-hidden ring-1 ring-white/5 min-h-[320px] relative">
+            <ContentLoadingBar isLoading={isRightDirLoading || isRightFileLoading} />
             <div className="px-5 pt-3 pb-2 border-b border-white/5 flex flex-wrap items-center gap-4">
                 <div className="flex flex-col md:flex-row md:items-center md:gap-4 min-w-0 flex-1">
                     <div className="flex items-center gap-2 min-w-0 mb-1 md:mb-0">
@@ -84,11 +85,6 @@ export default function RightPanel({
                 )}
                 {selectedType === 'dir' && selectedPath && (
                     <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4">
-                        {isRightDirLoading && (
-                            <div className="absolute inset-0 bg-[#0b0f14]/70 backdrop-blur-sm p-4 z-10">
-                                <RightDirSkeleton />
-                            </div>
-                        )}
                         {rightDirError && !isRightDirLoading && (
                             <div className="text-red-300 text-xs mb-4">Error loading folder.</div>
                         )}
@@ -112,9 +108,13 @@ export default function RightPanel({
                                                 <td className="py-1.5 px-2 flex items-center gap-2">
                                                     <span className={`flex h-6 w-6 items-center justify-center rounded ${isDir ? 'text-amber-300' : 'text-sky-300'}`}>
                                                         {isDir ? (
-                                                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M1.5 3.25A.75.75 0 0 1 2.25 2.5h3.072a.75.75 0 0 1 .53.22l1.128 1.13h6.27a.75.75 0 0 1 .75.75v6.9a1.75 1.75 0 0 1-1.75 1.75h-10A1.75 1.75 0 0 1 .5 11.5v-7a.75.75 0 0 1 .75-.75Z" /></svg>
+                                                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                                                <path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"/>
+                                                            </svg>
                                                         ) : (
-                                                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M3.75 1A1.75 1.75 0 0 0 2 2.75v10.5C2 14.216 2.784 15 3.75 15h8.5A1.75 1.75 0 0 0 14 13.25V6.06c0-.464-.184-.909-.513-1.237L9.177 1.512A1.75 1.75 0 0 0 7.94 1H3.75ZM8.5 2.56c.09.05.173.11.246.183l4.06 4.06a.75.75 0 0 1 .183.246H9.75A1.75 1.75 0 0 1 8 5.25V2.56h.5Z" /></svg>
+                                                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                                                                <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/>
+                                                            </svg>
                                                         )}
                                                     </span>
                                                     <span className="truncate" title={child.name}>{child.name}</span>
@@ -133,11 +133,6 @@ export default function RightPanel({
                 )}
                 {selectedType === 'file' && selectedPath && (
                     <div className="absolute inset-0 overflow-auto custom-scrollbar">
-                        {isRightFileLoading && (
-                            <div className="absolute inset-0 bg-[#0b0f14]/80 backdrop-blur-sm z-10 p-4">
-                                <CodeSkeleton />
-                            </div>
-                        )}
                         {rightFileContent && !isRightFileLoading && renderFileContent(selectedPath, rightFileContent, rightFileRaw)}
                         {!isRightFileLoading && !rightFileContent && (
                             <p className="p-4 text-xs text-white/40">No preview available.</p>
