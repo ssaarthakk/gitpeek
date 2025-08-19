@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { detectLanguage, isImage, isMarkdown } from './utils';
+import Image from 'next/image';
 
 const githubDarkTheme = {
     ...vscDarkPlus,
@@ -40,7 +41,7 @@ export function renderFileContent(filePath: string, content: string, rawBase64: 
         const dataUri = `data:${mime};base64,${rawBase64}`;
         return (
             <div className="p-6 flex flex-col items-start gap-4">
-                <img src={dataUri} alt={filePath} className="max-w-full h-auto rounded-lg ring-1 ring-white/10 bg-white/5" />
+                <Image src={dataUri} alt={filePath} className="max-w-full h-auto rounded-lg ring-1 ring-white/10 bg-white/5" />
                 <a href={dataUri} download target="_blank" rel="noreferrer" className="text-[11px] text-sky-400 hover:underline">Open raw image in new tab</a>
             </div>
         );
@@ -77,7 +78,7 @@ export function renderFileContent(filePath: string, content: string, rawBase64: 
                             return <a href={href} className="text-sky-400 hover:underline" {...rest}>{children}</a>;
                         },
                         img({src, alt}: any){
-                            return <img src={src} alt={alt} className="max-w-full h-auto rounded-md border border-[#30363d] bg-[#0d1117]" />;
+                            return <Image src={src} alt={alt} className="max-w-full h-auto rounded-md border border-[#30363d] bg-[#0d1117]" />;
                         }
                     }}
                 >{content}</ReactMarkdown>

@@ -55,7 +55,7 @@ export default function useFileContent(repoFullName: string, filePath: string | 
     };
 
     fetchFile();
-  }, [filePath, repoFullName, session, key, octokit]);
+  }, [filePath, repoFullName, session, key, octokit, providedToken]);
 
   return { content, raw, isLoading };
 }

@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
 import React from "react";
 
 export const Meteors = ({
@@ -14,7 +13,6 @@ export const Meteors = ({
   return (
     <>
       {meteors.map((el, idx) => {
-        const meteorCount = number || 20;
         // Calculate position to spread meteors across full width
         const leftPosition = Math.random() * 100; // Random position from 0-100%
         const topPosition = Math.random() * 50; // Random position from 0-50%

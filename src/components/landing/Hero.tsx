@@ -2,9 +2,7 @@
 
 import { Button, Chip } from '@heroui/react';
 import { signIn, useSession } from 'next-auth/react';
-import Link from 'next/link';
 import Reveal from '@/components/animations/Reveal';
-import { Meteors } from '@/components/ui/meteors';
 import { HeroTitle } from '@/components/landing/HeroTitle';
 import { useSignInLoading } from '@/components/landing/SignInLoadingContext';
 
