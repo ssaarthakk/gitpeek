@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { Account } from "@prisma/client";
 import axios from "axios";
-import useOctokit from '@/hooks/useOctokit';
 import { Octokit } from "@octokit/core";
 import { createAppAuth } from "@octokit/auth-app";
 
@@ -77,23 +76,27 @@ export async function createInstallationToken(installationId: string) {
 }
 
 export async function ensureInstallation(userAccessToken: string) {
-    const octokit = useOctokit(userAccessToken);
-    if (!octokit) {
+    // Create octokit instance directly instead of using the hook
+    const octokit = new Octokit({ auth: userAccessToken });
+    
+    try {
+        const { data } = await octokit.request("GET /user/installations");
+
+        const installation = data.installations.find(
+            (i) => i.app_slug === process.env.GITHUB_APP_SLUG
+        );
+
+        if (!installation) {
+            return {
+                redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
+            };
+        }
+
+        return { ok: true, installation };
+    } catch (error) {
+        console.error('Failed to get GitHub installation:', error);
         return {
             redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
         };
     }
-    const { data } = await octokit.request("GET /user/installations");
-
-    const installation = data.installations.find(
-        (i) => i.app_slug === process.env.GITHUB_APP_SLUG
-    );
-
-    if (!installation) {
-        return {
-            redirect: `https://github.com/apps/${process.env.GITHUB_APP_SLUG}/installations/new`,
-        };
-    }
-
-    return { ok: true, installation };
 }

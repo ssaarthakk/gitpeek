@@ -26,13 +26,14 @@ export function SignInLoadingProvider({ children }: { children: React.ReactNode 
 export function useSignInLoading() {
   const context = useContext(SignInLoadingContext);
   if (context === undefined) {
-    // Return a default implementation if used outside provider
-    console.warn('useSignInLoading used outside SignInLoadingProvider, falling back to local state');
-    const [isSignInLoading, setIsSignInLoading] = useState(false);
-    return { 
-      isSignInLoading, 
-      setSignInLoading: setIsSignInLoading 
-    };
+    // For static generation, return a default state
+    if (typeof window === 'undefined') {
+      return { 
+        isSignInLoading: false, 
+        setSignInLoading: () => {} 
+      };
+    }
+    throw new Error('useSignInLoading must be used within a SignInLoadingProvider');
   }
   return context;
 }

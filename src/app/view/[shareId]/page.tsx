@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import RepoContentView from "@/components/RepoContentView";
 import { createInstallationToken } from '@/lib/github';
 
-export default async function SharePageView({ params }: { params: { shareId: string } }) {
+export default async function SharePageView({ params }: { params: Promise<{ shareId: string }> }) {
 
     const { shareId } = await params;
 

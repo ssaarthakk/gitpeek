@@ -3,6 +3,7 @@ import "./globals.css";
 import Provider from "@/components/Provider";
 import { ToastProvider } from "@/hooks/useToast";
 import LoadingBar from "@/components/LoadingBar";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Git Peek",
@@ -19,7 +20,9 @@ export default function RootLayout({
           <body className="flex flex-col min-h-screen w-screen overflow-x-hidden font-sans antialiased">
             <Provider>
               <ToastProvider>
-                <LoadingBar />
+                <Suspense fallback={null}>
+                  <LoadingBar />
+                </Suspense>
                 {/* <ScrollProgress /> */}
                 {children}
               </ToastProvider>

@@ -14,9 +14,10 @@ export async function POST(request: Request) {
   try {
     // Verify the event is genuinely from Stripe
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`❌ Error message: ${err.message}`);
-    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`❌ Error message: ${errorMessage}`);
+    return new NextResponse(`Webhook Error: ${errorMessage}`, { status: 400 });
   }
 
   // Handle the 'checkout.session.completed' event
@@ -40,7 +41,8 @@ export async function POST(request: Request) {
           },
         },
       });
-    } catch (err) {
+    } catch (error) {
+      console.error('Failed to update user credits:', error);
       return new NextResponse("Webhook Error: Failed to update user credits", { status: 500 });
     }
   }

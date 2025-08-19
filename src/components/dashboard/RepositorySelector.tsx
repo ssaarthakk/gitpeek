@@ -49,11 +49,8 @@ export default function RepositorySelector({
     const handleInstallClick = () => {
         setInstallLoading(true);
         try {
-            const maybe = openInstallationWindow() as unknown;
-            // If a promise is returned, keep loading until navigation or failure
-            if (typeof (maybe as any)?.then === 'function') {
-                (maybe as Promise<unknown>).catch(() => setInstallLoading(false));
-            }
+            openInstallationWindow();
+            // Installation window opened successfully
         } catch {
             setInstallLoading(false);
         }

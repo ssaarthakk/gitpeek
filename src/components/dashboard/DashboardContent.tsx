@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Session } from 'next-auth';
 import { Spacer, useDisclosure } from '@heroui/react';
 import { useToast } from '@/hooks/useToast';
@@ -54,11 +54,7 @@ export default function DashboardContent({
         onOpenChange: onShareModalOpenChange
     } = useDisclosure();
 
-    useEffect(() => {
-        fetchShareLinks();
-    }, []);
-
-    const fetchShareLinks = async () => {
+    const fetchShareLinks = useCallback(async () => {
         try {
             const response = await axios.get('/api/links');
             setShareLinks(response.data);
@@ -68,7 +64,11 @@ export default function DashboardContent({
         } finally {
             setShareLinksLoading(false);
         }
-    };
+    }, [toast]);
+
+    useEffect(() => {
+        fetchShareLinks();
+    }, [fetchShareLinks]);
 
     const handleCreateShareLink = async () => {
         if (!selectedRepo) {
@@ -100,8 +100,12 @@ export default function DashboardContent({
             onShareModalOpenChange(); // Close the modal
             setSelectedExpiry('never'); // Reset to default
 
-        } catch (error: any) {
-            const message = error.response?.data?.error || 'Failed to create share link';
+        } catch (error: unknown) {
+            let message = 'Failed to create share link';
+            if (error && typeof error === 'object' && 'response' in error) {
+                const response = (error as { response?: { data?: { error?: string } } }).response;
+                message = response?.data?.error || message;
+            }
             toast.error(message);
         } finally {
             setIsCreatingShare(false);
@@ -117,6 +121,7 @@ export default function DashboardContent({
             onOpenChange(); // Close the modal
             setLinkToDelete(null);
         } catch (error) {
+            console.error('Failed to delete share link:', error);
             toast.error('Failed to delete share link');
         } finally {
             setIsDeleting(false);

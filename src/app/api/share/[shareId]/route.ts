@@ -4,14 +4,14 @@ import prisma from "@/lib/prisma";
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { shareId: string } }
+    { params }: { params: Promise<{ shareId: string }> }
 ) {
     const session = await auth();
     if (!session?.user?.id) {
         return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
-    const { shareId } = params;
+    const { shareId } = await params;
 
     try {
         // If a user tries to delete a link that isn't theirs, 'count' will be 0.

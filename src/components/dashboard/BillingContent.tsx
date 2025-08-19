@@ -233,17 +233,15 @@ export default function BillingContent({ session }: BillingContentProps) {
                   </span>
                 </div>
                 <p className="text-sm text-white/70">
-                  Our payment processor is currently experiencing issues. We're working to resolve this as soon as possible.
+                  Our payment processor is currently experiencing issues. We&apos;re working to resolve this as soon as possible.
                 </p>
               </div>
 
-              <div className="space-y-4">
+                <div className="space-y-4">
                 <p className="text-white/70">
-                  Need more credits? Don't worry! While we fix the payment system, 
-                  we're providing credits free of charge. Contact us using one of the methods below:
-                </p>
-
-                <div className="space-y-3">
+                  Need more credits? Don&apos;t worry! While we fix the payment system, 
+                  we&apos;re providing credits free of charge. Contact us using one of the methods below:
+                </p>                <div className="space-y-3">
                   <Button
                     as="a"
                     href="https://twitter.com/ssaarthakk"
