@@ -67,12 +67,12 @@ export default function Pricing() {
         <Card className="bg-white/5 border border-white/10">
           <CardHeader className="flex flex-col items-start">
             <h3 className="text-xl font-semibold text-white">Pay As You Go</h3>
-            <p className="text-3xl font-bold text-white mt-1">$5</p>
+            <p className="text-3xl font-bold text-white mt-1">$1 / Credit</p>
           </CardHeader>
           <Divider className="bg-white/10" />
           <CardBody>
             <ul className="text-sm text-white/80 list-disc pl-5 space-y-2">
-              <li>Purchase 5 additional credits anytime.</li>
+              <li>Purchase any number of additional credits anytime.</li>
             </ul>
             <Button 
               onPress={handleBuyCredits} 
