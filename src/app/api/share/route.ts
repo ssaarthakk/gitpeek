@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 export async function POST(request: Request) {
 
@@ -26,7 +26,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const newShareLink = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  const newShareLink = await prisma.$transaction(
+    async (
+      tx: Omit<
+        PrismaClient,
+        "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+      >
+    ) => {
 
       const user = await tx.user.findUnique({
         where: { id: session.user!.id },
