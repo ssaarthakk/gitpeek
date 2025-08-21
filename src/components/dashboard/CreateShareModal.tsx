@@ -87,10 +87,18 @@ export default function CreateShareModal({
                                         Link Expiration
                                     </label>
                                     <Select
-                                        selectedKeys={[selectedExpiry]}
+                                        selectedKeys={selectedExpiry ? [selectedExpiry] : []}
+                                        selectionMode="single"
                                         onSelectionChange={(keys) => {
-                                            const selected = Array.from(keys)[0] as string;
-                                            setSelectedExpiry(selected);
+                                            try {
+                                                const keysArray = Array.from(keys);
+                                                if (keysArray.length > 0) {
+                                                    const selected = keysArray[0] as string;
+                                                    setSelectedExpiry(selected);
+                                                }
+                                            } catch (error) {
+                                                console.error('Selection change error:', error);
+                                            }
                                         }}
                                         classNames={{
                                             trigger: "bg-white/10 border-white/20 text-white",
@@ -114,7 +122,7 @@ export default function CreateShareModal({
                                     <p className="text-xs text-white/50">
                                         {selectedExpiry === 'never'
                                             ? 'The link will remain active until manually deleted'
-                                            : `The link will automatically expire after ${selectedExpiry.replace('-', ' ')}`
+                                            : `The link will automatically expire after ${selectedExpiry.includes('-') ? selectedExpiry.replace('-', ' ') : selectedExpiry}`
                                         }
                                     </p>
                                 </div>

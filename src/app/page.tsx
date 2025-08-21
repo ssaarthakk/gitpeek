@@ -4,8 +4,17 @@ import HowItWorks from "@/components/landing/HowItWorks";
 import FeaturesNew from "@/components/landing/FeaturesNew";
 import Footer from "@/components/Footer";
 import { SignInLoadingProvider } from "@/components/landing/SignInLoadingContext";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function HomePage() {
+  const session = await auth();
+  
+  // Redirect to dashboard if user is already logged in
+  if (session?.user) {
+    redirect('/dashboard');
+  }
+
   return (
     <SignInLoadingProvider>
       <main className="min-h-screen w-full bg-[#0b0f14] text-[#e6edf3]">
