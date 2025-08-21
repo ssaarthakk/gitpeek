@@ -50,7 +50,7 @@ export default function Pricing() {
           <Divider className="bg-white/10" />
           <CardBody>
             <ul className="text-sm text-white/80 list-disc pl-5 space-y-2">
-              <li>1 Free Share Credits on Sign-Up</li>
+              <li>1 Free Share Credit on Sign-Up</li>
             </ul>
             <Button 
               onPress={handleStartFree} 
