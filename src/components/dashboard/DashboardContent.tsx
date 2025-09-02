@@ -4,7 +4,7 @@ import { Session } from 'next-auth';
 import { Spacer, useDisclosure } from '@heroui/react';
 import { useToast } from '@/hooks/useToast';
 import useRepos from '@/hooks/useRepo';
-import axios from 'axios';
+import axios from '@/lib/api';
 
 // Import modular components
 import UserInfoCard from './UserInfoCard';

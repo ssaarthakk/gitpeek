@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import axios from 'axios';
+import axios from '@/lib/api';
 
 export default function BuyCreditsButton() {
   const [quantity, setQuantity] = useState(1);
