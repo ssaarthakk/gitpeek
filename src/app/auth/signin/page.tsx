@@ -2,19 +2,16 @@
 
 import { Button } from '@heroui/react';
 import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('github', { callbackUrl });
+      await signIn('github');
     } catch (error) {
       console.error('Error signing in:', error);
       setIsLoading(false);
