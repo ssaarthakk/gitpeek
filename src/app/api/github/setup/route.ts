@@ -17,15 +17,29 @@ export async function GET(request: Request) {
   }
 
   try {
-    const token = await createInstallationToken(installationId);
-
     await prisma.account.updateMany({
       where: { userId: session.user.id, provider: 'github' },
       data: {
         installation_id: installationId,
-        installation_token: token,
       },
     });
+    
+    console.log('Installation ID saved for user:', session.user.id);
+
+    try {
+      const token = await createInstallationToken(installationId);
+      
+      await prisma.account.updateMany({
+        where: { userId: session.user.id, provider: 'github' },
+        data: {
+          installation_token: token,
+        },
+      });
+      
+      console.log('Installation token created and saved');
+    } catch (tokenError) {
+      console.error('Failed to create installation token, but installation ID is saved:', tokenError);
+    }
 
     const html = `
       <!DOCTYPE html>
@@ -47,9 +61,7 @@ export async function GET(request: Request) {
     return new Response(html, { headers: { 'Content-Type': 'text/html' } });
 
   } catch (error) {
-    console.error("Failed to create installation token:", error);
+    console.error("Failed to save installation:", error);
     return NextResponse.redirect(new URL('/dashboard?error=setup_failed', request.url));
   }
-
-  return NextResponse.redirect(new URL('/dashboard', request.url));
 }

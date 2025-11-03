@@ -3,7 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 
-const GITHUB_APP_SLUG = 'git-peek';
+const GITHUB_APP_SLUG = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG || '';
 
 export default function useGitHubInstallation() {
   const { data: session, status, update } = useSession();

@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import {
     Modal,
     ModalContent,
@@ -7,7 +8,9 @@ import {
     ModalFooter,
     Button,
     Select,
-    SelectItem
+    SelectItem,
+    Switch,
+    Input
 } from '@heroui/react';
 
 type CreateShareModalProps = {
@@ -16,7 +19,7 @@ type CreateShareModalProps = {
     selectedRepo: string;
     selectedExpiry: string;
     setSelectedExpiry: (expiry: string) => void;
-    onCreateShareLink: () => void;
+    onCreateShareLink: (password?: string) => void;
     isCreating: boolean;
 };
 
@@ -29,10 +32,27 @@ export default function CreateShareModal({
     onCreateShareLink,
     isCreating
 }: CreateShareModalProps) {
+    const [passwordProtected, setPasswordProtected] = useState(false);
+    const [password, setPassword] = useState('');
+
+    const handleCreate = () => {
+        if (passwordProtected && password) {
+            onCreateShareLink(password);
+        } else {
+            onCreateShareLink();
+        }
+    };
+
     return (
         <Modal
             isOpen={isOpen}
-            onOpenChange={onOpenChange}
+            onOpenChange={(open) => {
+                onOpenChange();
+                if (!open) {
+                    setPasswordProtected(false);
+                    setPassword('');
+                }
+            }}
             classNames={{
                 base: "bg-[#161b22] border border-white/10",
                 header: "border-b border-white/10",
@@ -126,6 +146,41 @@ export default function CreateShareModal({
                                         }
                                     </p>
                                 </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <label className="block text-sm font-medium text-white">
+                                            Password Protection
+                                        </label>
+                                        <Switch
+                                            isSelected={passwordProtected}
+                                            onValueChange={setPasswordProtected}
+                                            classNames={{
+                                                wrapper: "group-data-[selected=true]:bg-indigo-600"
+                                            }}
+                                        />
+                                    </div>
+                                    {passwordProtected && (
+                                        <Input
+                                            type="password"
+                                            label="Password"
+                                            placeholder="Enter a password to protect this link"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            classNames={{
+                                                inputWrapper: "bg-white/10 border-white/20",
+                                                input: "text-white",
+                                                label: "text-white/70"
+                                            }}
+                                        />
+                                    )}
+                                    <p className="text-xs text-white/50">
+                                        {passwordProtected
+                                            ? 'Viewers will need to enter the password to access the repository'
+                                            : 'Anyone with the link can view the repository'
+                                        }
+                                    </p>
+                                </div>
                             </div>
                         </ModalBody>
                         <ModalFooter>
@@ -138,9 +193,10 @@ export default function CreateShareModal({
                             </Button>
                             <Button
                                 color="primary"
-                                onPress={onCreateShareLink}
+                                onPress={handleCreate}
                                 isLoading={isCreating}
                                 className="bg-indigo-600 hover:bg-indigo-700"
+                                isDisabled={passwordProtected && !password}
                             >
                                 {isCreating ? 'Creating...' : 'Create Share Link'}
                             </Button>

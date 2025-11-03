@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
 
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const { repoFullName, expiresIn } = await request.json();
+  const { repoFullName, expiresIn, password } = await request.json();
   if (!repoFullName || typeof repoFullName !== 'string') {
     return new NextResponse(JSON.stringify({ error: "Repository name not provided" }), { status: 400 });
   }
@@ -23,6 +24,12 @@ export async function POST(request: Request) {
     expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
   } else if (expiresIn === '7-days') {
     expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  }
+
+  let hashedPassword: string | null = null;
+  if (password && typeof password === 'string'&& password.length > 0) {
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
   }
 
   try {
@@ -53,6 +60,7 @@ export async function POST(request: Request) {
           repoFullName: repoFullName,
           userId: session.user!.id as string,
           expiresAt: expiresAt,
+          hashedPassword: hashedPassword,
         },
       });
 
