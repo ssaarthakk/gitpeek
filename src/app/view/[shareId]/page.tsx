@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
-import RepoContentView from "@/components/RepoContentView";
 import { createInstallationToken } from '@/lib/github';
+import ProtectedRepoView from '@/components/ProtectedRepoView';
 
 export default async function SharePageView({ params }: { params: Promise<{ shareId: string }> }) {
 
@@ -36,13 +36,16 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
     try {
         const freshInstallationToken = await createInstallationToken(account.installation_id!);
 
+        const isPasswordProtected = !!shareLink.hashedPassword;
+
         return (
-            <main className="flex h-screen w-screen">
-                <RepoContentView
-                    repoFullName={shareLink.repoFullName}
-                    accessToken={freshInstallationToken}
-                />
-            </main>
+            <ProtectedRepoView
+                shareId={shareId}
+                repoFullName={shareLink.repoFullName}
+                accessToken={freshInstallationToken}
+                isPasswordProtected={isPasswordProtected}
+                isInitiallyVerified={false}
+            />
         );
     } catch (error) {
         if (

@@ -17,32 +17,15 @@ export async function GET(request: Request) {
   }
 
   try {
-    // const token = await createInstallationToken(installationId);
+    const token = await createInstallationToken(installationId);
     
     await prisma.account.updateMany({
       where: { userId: session.user.id, provider: 'github' },
       data: {
         installation_id: installationId,
-        // installation_token: token
+        installation_token: token
       },
     });
-    
-    console.log('Installation ID saved for user:', session.user.id);
-
-    try {
-      const token = await createInstallationToken(installationId);
-      
-      await prisma.account.updateMany({
-        where: { userId: session.user.id, provider: 'github' },
-        data: {
-          installation_token: token,
-        },
-      });
-      
-      console.log('Installation token created and saved');
-    } catch (tokenError) {
-      console.error('Failed to create installation token, but installation ID is saved:', tokenError);
-    }
 
     const html = `
       <!DOCTYPE html>
