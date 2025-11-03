@@ -37,7 +37,7 @@ export default function PasswordProtection({ shareId, onSuccess }: PasswordProte
         const data = await response.json();
         setError(data.error || 'Incorrect password');
       }
-    } catch (err) {
+    } catch (error) {
       setError('An error occurred. Please try again.');
     } finally {
       setIsVerifying(false);
@@ -103,7 +103,7 @@ export default function PasswordProtection({ shareId, onSuccess }: PasswordProte
           </form>
 
           <div className="text-center text-xs text-white/50">
-            <p>Don't have the password? Contact the repository owner.</p>
+            <p>Don&apos;t have the password? Contact the repository owner.</p>
           </div>
         </CardBody>
       </Card>

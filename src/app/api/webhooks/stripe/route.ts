@@ -2,9 +2,17 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import prisma from "@/lib/prisma";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+let stripe: Stripe;
 
 export async function POST(request: Request) {
+  if (!stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      return new NextResponse("Stripe secret key not set", { status: 500 });
+    }
+    stripe = new Stripe(secretKey);
+  }
+
   const body = await request.text();
   const signature = request.headers.get("stripe-signature")!;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

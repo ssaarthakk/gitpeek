@@ -2,9 +2,16 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+let stripe: Stripe;
 
 export async function POST(request: Request) {
+    if (!stripe) {
+        const secretKey = process.env.STRIPE_SECRET_KEY;
+        if (!secretKey) {
+            return new NextResponse("Stripe secret key not set", { status: 500 });
+        }
+        stripe = new Stripe(secretKey);
+    }
 
     const session = await auth();
     if (!session?.user?.id) {
