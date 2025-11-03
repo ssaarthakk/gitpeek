@@ -38,7 +38,6 @@ export default function FeaturesSection() {
                 "Add an extra layer of security by requiring a password to view shared repositories.",
             skeleton: <SkeletonFour />,
             className: "col-span-1 lg:col-span-3 border-b lg:border-none",
-            comingSoon: true,
         },
     ];
 
