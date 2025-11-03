@@ -15,7 +15,6 @@ export async function getFreshAccessToken(account: Account) {
         return account.access_token;
     }
 
-    console.log("Access token expired, refreshing...");
     try {
         const response = await axios.post(
             "https://github.com/login/oauth/access_token",
@@ -58,27 +57,12 @@ export async function getFreshAccessToken(account: Account) {
 
 export async function createInstallationToken(installationId: string) {
   try {
-    // Clean up the private key - handle both real newlines and \n literals
-    let privateKey = process.env.GITHUB_PRIVATE_KEY!;
-    
-    // Remove quotes if they exist at the beginning and end
-    privateKey = privateKey.trim().replace(/^["']|["']$/g, '');
-    
-    // Replace literal \n with actual newlines if they exist
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    console.log('Creating installation token for installation:', installationId);
-    console.log('App ID:', process.env.GITHUB_APP_ID);
-    console.log('Private key starts with:', privateKey.substring(0, 50));
-    console.log('Private key ends with:', privateKey.substring(privateKey.length - 50));
 
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
         appId: process.env.GITHUB_APP_ID!,
-        privateKey: privateKey,
+        privateKey: process.env.GITHUB_PRIVATE_KEY!.replace(/\\n/g, '\n'),
         installationId: installationId,
       },
     });
@@ -90,7 +74,6 @@ export async function createInstallationToken(installationId: string) {
     console.error("Failed to create installation token:", error);
     if (error instanceof Error) {
       console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
     }
     throw new Error("Could not create GitHub installation token.");
   }

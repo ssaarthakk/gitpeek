@@ -17,10 +17,13 @@ export async function GET(request: Request) {
   }
 
   try {
+    // const token = await createInstallationToken(installationId);
+    
     await prisma.account.updateMany({
       where: { userId: session.user.id, provider: 'github' },
       data: {
         installation_id: installationId,
+        // installation_token: token
       },
     });
     
@@ -64,4 +67,6 @@ export async function GET(request: Request) {
     console.error("Failed to save installation:", error);
     return NextResponse.redirect(new URL('/dashboard?error=setup_failed', request.url));
   }
+
+  return NextResponse.redirect(new URL('/dashboard', request.url));
 }
