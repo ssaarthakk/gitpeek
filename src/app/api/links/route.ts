@@ -16,7 +16,12 @@ export async function GET() {
             },
             orderBy: {
                 createdAt: 'desc'
-            }
+            },
+            include: {
+                _count: {
+                    select: { linkViews: true },
+                },
+            },
         });
 
         return new NextResponse(JSON.stringify(links), { status: 200 });

@@ -17,6 +17,13 @@ export default function PasswordProtection({ shareId, onSuccess }: PasswordProte
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (error) {
+      setError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -68,7 +75,7 @@ export default function PasswordProtection({ shareId, onSuccess }: PasswordProte
               label="Password"
               placeholder="Enter password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               isInvalid={!!error}
               errorMessage={error}
               classNames={{

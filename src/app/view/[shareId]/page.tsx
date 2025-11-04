@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { createInstallationToken } from '@/lib/github';
 import ProtectedRepoView from '@/components/ProtectedRepoView';
+import { headers } from 'next/headers';
 
 export default async function SharePageView({ params }: { params: Promise<{ shareId: string }> }) {
 
@@ -16,6 +17,24 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
                 <h1 className="font-bold text-2xl">Link not found or has expired. Please request a new link.</h1>
             </div>
         );
+    }
+
+    try {
+        const headersList = await headers();
+        const userAgent = headersList.get('user-agent');
+        const ipAddress = headersList.get('x-forwarded-for');
+
+        // Asynchronously create a new view record. We don't need to
+        // "await" this, as we don't want it to block the page load.
+        prisma.linkView.create({
+            data: {
+                shareLinkId: shareLink.id,
+                userAgent: userAgent,
+                ipAddress: ipAddress,
+            },
+        }).catch((err: any) => console.error("Failed to log view:", err)); // Log errors
+    } catch (error) {
+        console.error("Analytics logging error:", error);
     }
 
     const account = await prisma.account.findFirst({

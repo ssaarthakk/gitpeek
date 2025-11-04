@@ -63,7 +63,18 @@ model ShareLink {
   createdAt      DateTime  @default(now())
   expiresAt      DateTime?
   hashedPassword String?
+  linkViews      LinkView[]
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LinkView {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userAgent String?
+  ipAddress String?
+
+  shareLinkId String
+  shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
 }

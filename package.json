@@ -37,7 +37,7 @@
     "@octokit/types": "^14.1.0",
     "@primer/octicons-react": "^19.9.0",
     "@prisma/adapter-neon": "^6.14.0",
-    "@prisma/client": "6.13.0",
+    "@prisma/client": "6.18.0",
     "@tabler/icons-react": "^3.34.1",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.3",
@@ -70,7 +70,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "prisma": "^6.13.0",
+    "prisma": "^6.18.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5"
