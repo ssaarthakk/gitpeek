@@ -16,8 +16,8 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  credits       Int       @default(1)
-  sharedLinks   ShareLink[]
+  credits     Int         @default(1)
+  sharedLinks ShareLink[]
 }
 
 model Account {
@@ -58,15 +58,16 @@ model VerificationToken {
 }
 
 model ShareLink {
-  id             String    @id @default(cuid())
+  id             String     @id @default(cuid())
   repoFullName   String
-  createdAt      DateTime  @default(now())
+  createdAt      DateTime   @default(now())
   expiresAt      DateTime?
   hashedPassword String?
   linkViews      LinkView[]
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOneTime Boolean @default(false)
 }
 
 model LinkView {

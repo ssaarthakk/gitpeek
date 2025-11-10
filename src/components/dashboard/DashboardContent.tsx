@@ -78,7 +78,7 @@ export default function DashboardContent({
         onShareModalOpen();
     };
 
-    const createShareLinkWithExpiry = async (password?: string) => {
+    const createShareLinkWithExpiry = async (password?: string, isOneTime?: boolean) => {
         if (!selectedRepo) return;
 
         setIsCreatingShare(true);
@@ -87,7 +87,8 @@ export default function DashboardContent({
             const response = await axios.post('/api/share', {
                 repoFullName: selectedRepo,
                 expiresIn,
-                password: password || undefined
+                password: password || undefined,
+                isOneTime: isOneTime || false
             });
             const newLink = response.data;
             setShareLinks(prev => [newLink, ...prev]);

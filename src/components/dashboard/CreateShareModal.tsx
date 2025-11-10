@@ -19,7 +19,7 @@ type CreateShareModalProps = {
     selectedRepo: string;
     selectedExpiry: string;
     setSelectedExpiry: (expiry: string) => void;
-    onCreateShareLink: (password?: string) => void;
+    onCreateShareLink: (password?: string, isOneTime?: boolean) => void;
     isCreating: boolean;
 };
 
@@ -34,12 +34,22 @@ export default function CreateShareModal({
 }: CreateShareModalProps) {
     const [passwordProtected, setPasswordProtected] = useState(false);
     const [password, setPassword] = useState('');
+    const [isOneTime, setIsOneTime] = useState(false);
+
+    const [wasCreating, setWasCreating] = useState(false);
+    if (isCreating && !wasCreating) setWasCreating(true);
+    if (!isCreating && wasCreating) {
+        setPasswordProtected(false);
+        setPassword('');
+        setIsOneTime(false);
+        setWasCreating(false);
+    }
 
     const handleCreate = () => {
         if (passwordProtected && password) {
-            onCreateShareLink(password);
+            onCreateShareLink(password, isOneTime);
         } else {
-            onCreateShareLink();
+            onCreateShareLink(undefined, isOneTime);
         }
     };
 
@@ -51,6 +61,7 @@ export default function CreateShareModal({
                 if (!open) {
                     setPasswordProtected(false);
                     setPassword('');
+                    setIsOneTime(false);
                 }
             }}
             classNames={{
@@ -180,6 +191,26 @@ export default function CreateShareModal({
                                             : 'Anyone with the link can view the repository'
                                         }
                                     </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-medium text-white">
+                                                One-Time Link
+                                            </label>
+                                            <p className="text-xs text-white/50 mt-1">
+                                                Link will be automatically deleted after first view
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            isSelected={isOneTime}
+                                            onValueChange={setIsOneTime}
+                                            classNames={{
+                                                wrapper: "group-data-[selected=true]:bg-indigo-600"
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </ModalBody>
