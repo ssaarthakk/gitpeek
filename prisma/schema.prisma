@@ -8,16 +8,15 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?     @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-
-  credits     Int         @default(1)
-  sharedLinks ShareLink[]
+  credits       Int         @default(1)
+  sharedLinks   ShareLink[]
 }
 
 model Account {
@@ -64,18 +63,17 @@ model ShareLink {
   expiresAt      DateTime?
   hashedPassword String?
   linkViews      LinkView[]
-
-  userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isOneTime Boolean @default(false)
+  userId         String
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOneTime      Boolean    @default(false)
+  allowCopying   Boolean    @default(false)
 }
 
 model LinkView {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  userAgent String?
-  ipAddress String?
-
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  userAgent   String?
+  ipAddress   String?
   shareLinkId String
   shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
 }

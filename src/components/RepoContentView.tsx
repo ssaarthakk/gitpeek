@@ -9,9 +9,16 @@ import RightPanel from './RepoContentView/RightPanel';
 type RepoContentViewProps = {
     repoFullName: string;
     accessToken?: string;
+    allowCopying: boolean;
 };
 
-export default function RepoContentView({ repoFullName, accessToken  }: RepoContentViewProps) {
+export default function RepoContentView({ repoFullName, accessToken, allowCopying }: RepoContentViewProps) {
+
+    const noSelectStyle: React.CSSProperties = !allowCopying ? {
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+    } : {};
 
     const [path, setPath] = useState('');
     // Right-side selected item path & type (file or dir) independent of left path changes
@@ -73,7 +80,7 @@ export default function RepoContentView({ repoFullName, accessToken  }: RepoCont
     }, [leftContent, path, selectedPath]);
 
     return (
-        <div className="w-full h-full flex flex-col md:flex-row gap-4 p-4">
+        <div className="w-full h-full flex flex-col md:flex-row gap-4 p-4" style={noSelectStyle}>
             <LeftPanel
                 repoFullName={repoFullName}
                 path={path}

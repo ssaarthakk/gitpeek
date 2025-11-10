@@ -19,7 +19,7 @@ type CreateShareModalProps = {
     selectedRepo: string;
     selectedExpiry: string;
     setSelectedExpiry: (expiry: string) => void;
-    onCreateShareLink: (password?: string, isOneTime?: boolean) => void;
+    onCreateShareLink: (password?: string, isOneTime?: boolean, allowCopying?: boolean) => void;
     isCreating: boolean;
 };
 
@@ -35,6 +35,7 @@ export default function CreateShareModal({
     const [passwordProtected, setPasswordProtected] = useState(false);
     const [password, setPassword] = useState('');
     const [isOneTime, setIsOneTime] = useState(false);
+    const [allowCopying, setAllowCopying] = useState(false);
 
     const [wasCreating, setWasCreating] = useState(false);
     if (isCreating && !wasCreating) setWasCreating(true);
@@ -42,14 +43,15 @@ export default function CreateShareModal({
         setPasswordProtected(false);
         setPassword('');
         setIsOneTime(false);
+        setAllowCopying(true);
         setWasCreating(false);
     }
 
     const handleCreate = () => {
         if (passwordProtected && password) {
-            onCreateShareLink(password, isOneTime);
+            onCreateShareLink(password, isOneTime, allowCopying);
         } else {
-            onCreateShareLink(undefined, isOneTime);
+            onCreateShareLink(undefined, isOneTime, allowCopying);
         }
     };
 
@@ -62,6 +64,7 @@ export default function CreateShareModal({
                     setPasswordProtected(false);
                     setPassword('');
                     setIsOneTime(false);
+                    setAllowCopying(true);
                 }
             }}
             classNames={{
@@ -76,7 +79,7 @@ export default function CreateShareModal({
                     <>
                         <ModalHeader className="flex flex-col gap-1">
                             <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                                <div className="h-10 w-10 rounded-full bg-indigo-500/20 flex items-center justify-center hover:bg-indigo-500/40 transition">
                                     <svg className="h-5 w-5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                     </svg>
@@ -132,7 +135,7 @@ export default function CreateShareModal({
                                             }
                                         }}
                                         classNames={{
-                                            trigger: "bg-white/10 border-white/20 text-white",
+                                            trigger: "bg-white/10 border-white/20 text-white cursor-pointer",
                                             value: "text-white",
                                             popoverContent: "bg-[#161b22] border border-white/10"
                                         }}
@@ -206,6 +209,26 @@ export default function CreateShareModal({
                                         <Switch
                                             isSelected={isOneTime}
                                             onValueChange={setIsOneTime}
+                                            classNames={{
+                                                wrapper: "group-data-[selected=true]:bg-indigo-600"
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-medium text-white">
+                                                Allow Copying
+                                            </label>
+                                            <p className="text-xs text-white/50 mt-1">
+                                                Allow viewers to select and copy text from the repository
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            isSelected={allowCopying}
+                                            onValueChange={setAllowCopying}
                                             classNames={{
                                                 wrapper: "group-data-[selected=true]:bg-indigo-600"
                                             }}

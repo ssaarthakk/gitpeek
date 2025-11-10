@@ -88,6 +88,7 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
                 accessToken={freshInstallationToken}
                 isPasswordProtected={isPasswordProtected}
                 isInitiallyVerified={false}
+                allowCopying={shareLink.allowCopying}
             />
         );
     } catch (error) {

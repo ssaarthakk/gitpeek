@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const { repoFullName, expiresIn, password, isOneTime } = await request.json();
+  const { repoFullName, expiresIn, password, isOneTime, allowCopying } = await request.json();
   if (!repoFullName || typeof repoFullName !== 'string') {
     return new NextResponse(JSON.stringify({ error: "Repository name not provided" }), { status: 400 });
   }
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
           expiresAt: expiresAt,
           hashedPassword: hashedPassword,
           isOneTime: !!isOneTime,
+          allowCopying: allowCopying ?? false,
         },
       });
 

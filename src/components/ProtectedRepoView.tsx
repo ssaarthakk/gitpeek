@@ -10,6 +10,7 @@ type ProtectedRepoViewProps = {
   accessToken: string;
   isPasswordProtected: boolean;
   isInitiallyVerified: boolean;
+  allowCopying: boolean;
 };
 
 export default function ProtectedRepoView({
@@ -18,6 +19,7 @@ export default function ProtectedRepoView({
   accessToken,
   isPasswordProtected,
   isInitiallyVerified,
+  allowCopying
 }: ProtectedRepoViewProps) {
   const [isVerified, setIsVerified] = useState(isInitiallyVerified);
 
@@ -35,6 +37,7 @@ export default function ProtectedRepoView({
       <RepoContentView
         repoFullName={repoFullName}
         accessToken={accessToken}
+        allowCopying={allowCopying}
       />
     </main>
   );
