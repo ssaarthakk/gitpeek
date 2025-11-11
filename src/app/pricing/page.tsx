@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'GitPeek - Pricing',
+  description: 'Simple, transparent pricing for GitPeek. Start free with 5 credits and upgrade as you grow. Create secure, time-limited links to share your GitHub repositories.',
 };
 
 export default function PricingPage() {

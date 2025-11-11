@@ -14,6 +14,9 @@ type LeftPanelProps = {
     goUpLeft: () => void;
     openDirectoryInLeft: (path: string) => void;
     selectItem: (item: any) => void;
+    allowCopying?: boolean;
+    shareId?: string;
+    onDownload?: () => void;
 };
 
 export default function LeftPanel({
@@ -26,7 +29,10 @@ export default function LeftPanel({
     breadcrumbSegments,
     goUpLeft,
     openDirectoryInLeft,
-    selectItem
+    selectItem,
+    allowCopying,
+    shareId,
+    onDownload
 }: LeftPanelProps) {
 
     const leftSorted = Array.isArray(leftContent)
@@ -38,16 +44,29 @@ export default function LeftPanel({
             <ContentLoadingBar isLoading={isLeftLoading} />
             <div className="px-4 pt-4 pb-2 border-b border-white/5 flex items-center justify-between gap-2 bg-white/[0.02] backdrop-blur-sm">
                 <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-indigo-400/30 text-indigo-200 text-sm">
-                            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-label="GitHub Repository">
-                                <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z"/>
-                            </svg>
-                        </div>
+                    <div className="h-8 w-8 rounded-lg bg-indigo-500/20 flex items-center justify-center ring-1 ring-indigo-400/30 text-indigo-200 text-sm">
+                        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-label="GitHub Repository">
+                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 1 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 0 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 0 1 1-1h8zM5 12.25v3.25a.25.25 0 0 0 .4.2l1.45-1.087a.25.25 0 0 1 .3 0L8.6 15.7a.25.25 0 0 0 .4-.2v-3.25a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25z" />
+                        </svg>
+                    </div>
                     <h3 className="text-[14px] font-semibold tracking-wide text-white truncate" title={repoFullName}>{repoFullName}</h3>
                 </div>
-                {path && (
-                    <Button size="sm" variant="flat" className="text-[10px]" onPress={goUpLeft}>Up</Button>
-                )}
+                <div className="flex items-center gap-2">
+                    {allowCopying && shareId && onDownload && (
+                        <button
+                            onClick={onDownload}
+                            className="p-1.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer"
+                            title="Download Repository"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                    )}
+                    {path && (
+                        <Button size="sm" variant="flat" className="text-[10px]" onPress={goUpLeft}>Up</Button>
+                    )}
+                </div>
             </div>
             {breadcrumbSegments.length > 0 && (
                 <div className="px-3 py-1 border-b border-white/5">

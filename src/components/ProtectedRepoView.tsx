@@ -38,6 +38,7 @@ export default function ProtectedRepoView({
         repoFullName={repoFullName}
         accessToken={accessToken}
         allowCopying={allowCopying}
+        shareId={shareId}
       />
     </main>
   );

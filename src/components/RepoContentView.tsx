@@ -10,9 +10,10 @@ type RepoContentViewProps = {
     repoFullName: string;
     accessToken?: string;
     allowCopying: boolean;
+    shareId?: string;
 };
 
-export default function RepoContentView({ repoFullName, accessToken, allowCopying }: RepoContentViewProps) {
+export default function RepoContentView({ repoFullName, accessToken, allowCopying, shareId }: RepoContentViewProps) {
 
     const noSelectStyle: React.CSSProperties = !allowCopying ? {
         userSelect: 'none',
@@ -79,6 +80,23 @@ export default function RepoContentView({ repoFullName, accessToken, allowCopyin
         }
     }, [leftContent, path, selectedPath]);
 
+    const handleDownload = async () => {
+        if (!shareId) return;
+        
+        try {
+            const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
+                headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+            });
+            const repoData = await response.json();
+            const defaultBranch = repoData.default_branch || 'main';
+            
+            const downloadUrl = `/api/download/${shareId}/${defaultBranch}`;
+            window.location.href = downloadUrl;
+        } catch (error) {
+            console.error('Failed to download repository:', error);
+        }
+    };
+
     return (
         <div className="w-full h-full flex flex-col md:flex-row gap-4 p-4" style={noSelectStyle}>
             <LeftPanel
@@ -92,6 +110,9 @@ export default function RepoContentView({ repoFullName, accessToken, allowCopyin
                 goUpLeft={goUpLeft}
                 openDirectoryInLeft={openDirectoryInLeft}
                 selectItem={selectItem}
+                allowCopying={allowCopying}
+                shareId={shareId}
+                onDownload={handleDownload}
             />
             <RightPanel
                 selectedPath={selectedPath}

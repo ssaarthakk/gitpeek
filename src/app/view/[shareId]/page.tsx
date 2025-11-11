@@ -22,12 +22,14 @@ export async function generateMetadata({ params }: { params: Promise<{ shareId: 
 
     if (shareLink) {
         return {
-            title: `GitPeek - ${shareLink.repoFullName}`,
+            title: `${shareLink.repoFullName} - Shared via GitPeek`,
+            description: `View and explore the ${shareLink.repoFullName} repository shared securely with GitPeek. Browse code, files, and documentation in a clean, read-only interface.`,
         };
     }
 
     return {
         title: 'GitPeek - Repository View',
+        description: 'View shared GitHub repositories securely with GitPeek. Access code, files, and documentation in a clean, read-only interface.',
     };
 }
 

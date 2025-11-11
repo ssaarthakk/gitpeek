@@ -220,10 +220,10 @@ export default function CreateShareModal({
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
                                             <label className="block text-sm font-medium text-white">
-                                                Allow Copying
+                                                Allow Copying & Downloading
                                             </label>
                                             <p className="text-xs text-white/50 mt-1">
-                                                Allow viewers to select and copy text from the repository
+                                                Allow viewers to select and copy text, and download the repository as a ZIP file
                                             </p>
                                         </div>
                                         <Switch
