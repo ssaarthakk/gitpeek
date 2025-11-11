@@ -2,12 +2,11 @@ import prisma from "@/lib/prisma";
 import { createInstallationToken } from '@/lib/github';
 import ProtectedRepoView from '@/components/ProtectedRepoView';
 import { headers } from 'next/headers';
+import { Metadata } from 'next';
+import { cache } from 'react';
 
-export default async function SharePageView({ params }: { params: Promise<{ shareId: string }> }) {
-
-    const { shareId } = await params;
-
-    const shareLink = await prisma.shareLink.findUnique({
+const getShareLink = cache(async (shareId: string) => {
+    return await prisma.shareLink.findUnique({
         where: { id: shareId },
         include: {
             _count: {
@@ -15,6 +14,29 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
             },
         },
     });
+});
+
+export async function generateMetadata({ params }: { params: Promise<{ shareId: string }> }): Promise<Metadata> {
+    const { shareId } = await params;
+    const shareLink = await getShareLink(shareId);
+
+    if (shareLink) {
+        return {
+            title: `GitPeek - ${shareLink.repoFullName}`,
+        };
+    }
+
+    return {
+        title: 'GitPeek - Repository View',
+    };
+}
+
+export default async function SharePageView({ params }: { params: Promise<{ shareId: string }> }) {
+
+    const { shareId } = await params;
+    const shareLink = await getShareLink(shareId);
+
+
 
     if (!shareLink || (shareLink.expiresAt && shareLink.expiresAt < new Date())) {
         return (
