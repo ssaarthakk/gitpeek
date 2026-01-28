@@ -6,8 +6,16 @@ import { motion } from "motion/react";
 import Reveal from '@/components/animations/Reveal';
 import { LockIcon, ClockIcon, EyeIcon, ShieldCheckIcon } from "@primer/octicons-react";
 
+type Feature = {
+    title: string;
+    description: string;
+    skeleton: React.JSX.Element;
+    className: string;
+    comingSoon?: boolean;
+}
+
 export default function FeaturesSection() {
-    const features = [
+    const features: Feature[] = [
         {
             title: "Secure & Read-Only",
             description:
@@ -30,7 +38,6 @@ export default function FeaturesSection() {
             skeleton: <SkeletonThree />,
             className:
                 "col-span-1 lg:col-span-3 lg:border-r dark:border-neutral-800",
-            comingSoon: true,
         },
         {
             title: "Password Protection",
