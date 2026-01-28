@@ -1,7 +1,9 @@
 import Header from "@/components/Header";
 import Hero from "@/components/landing/Hero";
-import HowItWorks from "@/components/landing/HowItWorks";
-import FeaturesNew from "@/components/landing/FeaturesNew";
+import dynamic from 'next/dynamic';
+
+const HowItWorks = dynamic(() => import('@/components/landing/HowItWorks'));
+const FeaturesNew = dynamic(() => import('@/components/landing/FeaturesNew'));
 import Footer from "@/components/Footer";
 import { SignInLoadingProvider } from "@/components/landing/SignInLoadingContext";
 import { auth } from "@/auth";
@@ -9,7 +11,7 @@ import { redirect } from "next/navigation";
 
 export default async function HomePage() {
   const session = await auth();
-  
+
   // Redirect to dashboard if user is already logged in
   if (session?.user) {
     redirect('/dashboard');
