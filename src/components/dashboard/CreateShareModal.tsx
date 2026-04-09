@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Modal,
     ModalContent,
@@ -19,7 +19,7 @@ type CreateShareModalProps = {
     selectedRepo: string;
     selectedExpiry: string;
     setSelectedExpiry: (expiry: string) => void;
-    onCreateShareLink: (password?: string, isOneTime?: boolean, allowCopying?: boolean, requireEmail?: boolean) => void;
+    onCreateShareLink: (password?: string, isOneTime?: boolean, allowCopying?: boolean, requireEmail?: boolean, branch?: string) => void;
     isCreating: boolean;
 };
 
@@ -37,6 +37,27 @@ export default function CreateShareModal({
     const [isOneTime, setIsOneTime] = useState(false);
     const [allowCopying, setAllowCopying] = useState(false);
     const [requireEmail, setRequireEmail] = useState(false);
+    
+    const [branches, setBranches] = useState<string[]>([]);
+    const [selectedBranch, setSelectedBranch] = useState("main");
+    const [loadingBranches, setLoadingBranches] = useState(false);
+
+    useEffect(() => {
+        if (!selectedRepo || !isOpen) return;
+        
+        setLoadingBranches(true);
+        fetch(`/api/github/metadata?repo=${selectedRepo}`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    setBranches(data);
+                    if (!data.includes("main")) setSelectedBranch(data[0]);
+                    else setSelectedBranch("main");
+                }
+            })
+            .catch(console.error)
+            .finally(() => setLoadingBranches(false));
+    }, [selectedRepo, isOpen]);
 
     const [wasCreating, setWasCreating] = useState(false);
     if (isCreating && !wasCreating) setWasCreating(true);
@@ -51,9 +72,9 @@ export default function CreateShareModal({
 
     const handleCreate = () => {
         if (passwordProtected && password) {
-            onCreateShareLink(password, isOneTime, allowCopying, requireEmail);
+            onCreateShareLink(password, isOneTime, allowCopying, requireEmail, selectedBranch);
         } else {
-            onCreateShareLink(undefined, isOneTime, allowCopying, requireEmail);
+            onCreateShareLink(undefined, isOneTime, allowCopying, requireEmail, selectedBranch);
         }
     };
 
@@ -118,6 +139,36 @@ export default function CreateShareModal({
                                         </div>
                                     </div>
                                 )}
+
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-white">
+                                        Branch
+                                    </label>
+                                    <Select
+                                        label="Select Branch"
+                                        placeholder="Loading branches..."
+                                        isLoading={loadingBranches}
+                                        selectedKeys={selectedBranch ? [selectedBranch] : []}
+                                        onSelectionChange={(keys) => {
+                                            const arr = Array.from(keys);
+                                            if (arr.length > 0) setSelectedBranch(arr[0] as string);
+                                        }}
+                                        classNames={{
+                                            trigger: "bg-white/10 border-white/20 text-white cursor-pointer",
+                                            value: "text-white",
+                                            popoverContent: "bg-[#161b22] border border-white/10"
+                                        }}
+                                    >
+                                        {branches.map((branch) => (
+                                            <SelectItem key={branch} className="text-white text-sm" textValue={branch}>
+                                                {branch}
+                                            </SelectItem>
+                                        ))}
+                                    </Select>
+                                    <p className="text-xs text-white/50">
+                                        Choose the specific branch (or tag/commit) you want to share.
+                                    </p>
+                                </div>
 
                                 <div className="space-y-2">
                                     <label className="block text-sm font-medium text-white">

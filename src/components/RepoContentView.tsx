@@ -11,9 +11,10 @@ type RepoContentViewProps = {
     accessToken?: string;
     allowCopying: boolean;
     shareId?: string;
+    branch?: string;
 };
 
-export default function RepoContentView({ repoFullName, accessToken, allowCopying, shareId }: RepoContentViewProps) {
+export default function RepoContentView({ repoFullName, accessToken, allowCopying, shareId, branch }: RepoContentViewProps) {
 
     const noSelectStyle: React.CSSProperties = !allowCopying ? {
         userSelect: 'none',
@@ -30,19 +31,22 @@ export default function RepoContentView({ repoFullName, accessToken, allowCopyin
     const { content: leftContent, isLoading: isLeftLoading, error: leftError } = useRepoContent(
         repoFullName,
         path,
-        accessToken
+        accessToken,
+        branch
     );
     // If right panel is showing a directory, fetch its contents
     const { content: rightDirContent, isLoading: isRightDirLoading, error: rightDirError } = useRepoContent(
         selectedType === 'dir' ? repoFullName : null,
         selectedType === 'dir' && selectedPath ? selectedPath : '',
-        accessToken
+        accessToken,
+        branch
     );
     // If right panel is showing a file, fetch file content
     const { content: rightFileContent, raw: rightFileRaw, isLoading: isRightFileLoading } = useFileContent(
         repoFullName,
         selectedType === 'file' ? selectedPath : null,
-        accessToken
+        accessToken,
+        branch
     );
 
     const breadcrumbSegments = path.split('/').filter(Boolean);
@@ -84,13 +88,16 @@ export default function RepoContentView({ repoFullName, accessToken, allowCopyin
         if (!shareId) return;
         
         try {
-            const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
-                headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-            });
-            const repoData = await response.json();
-            const defaultBranch = repoData.default_branch || 'main';
+            let targetBranch = branch;
+            if (!targetBranch) {
+                const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
+                    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+                });
+                const repoData = await response.json();
+                targetBranch = repoData.default_branch || 'main';
+            }
             
-            const downloadUrl = `/api/download/${shareId}/${defaultBranch}`;
+            const downloadUrl = `/api/download/${shareId}/${targetBranch}`;
             window.location.href = downloadUrl;
         } catch (error) {
             console.error('Failed to download repository:', error);
@@ -113,6 +120,7 @@ export default function RepoContentView({ repoFullName, accessToken, allowCopyin
                 allowCopying={allowCopying}
                 shareId={shareId}
                 onDownload={handleDownload}
+                branch={branch}
             />
             <RightPanel
                 selectedPath={selectedPath}

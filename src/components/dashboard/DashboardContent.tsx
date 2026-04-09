@@ -78,7 +78,7 @@ export default function DashboardContent({
         onShareModalOpen();
     };
 
-    const createShareLinkWithExpiry = async (password?: string, isOneTime?: boolean, allowCopying?: boolean, requireEmail?: boolean) => {
+    const createShareLinkWithExpiry = async (password?: string, isOneTime?: boolean, allowCopying?: boolean, requireEmail?: boolean, branch?: string) => {
         if (!selectedRepo) return;
 
         setIsCreatingShare(true);
@@ -90,7 +90,8 @@ export default function DashboardContent({
                 password: password || undefined,
                 isOneTime: isOneTime || false,
                 allowCopying: allowCopying ?? true,
-                requireEmail: requireEmail || false
+                requireEmail: requireEmail || false,
+                ref: branch || 'main'
             });
             const newLink = response.data;
             setShareLinks(prev => [newLink, ...prev]);

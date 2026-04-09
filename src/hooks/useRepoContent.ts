@@ -7,14 +7,14 @@ import useOctokit from '@/hooks/useOctokit';
 
 type RepoContent = Endpoints['GET /repos/{owner}/{repo}/contents/{path}']['response']['data'];
 
-export default function useRepoContent(repoFullName: string | null, path: string = '', providedToken?: string) {
+export default function useRepoContent(repoFullName: string | null, path: string = '', providedToken?: string, branch?: string) {
   const { data: session } = useSession();
   const octokit = useOctokit(providedToken || session?.accessToken);
   const [content, setContent] = useState<RepoContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cacheRef = useRef<Record<string, RepoContent>>({});
-  const key = `${repoFullName || ''}::${path}`;
+  const key = `${repoFullName || ''}::${path}::${branch || 'main'}`;
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -34,6 +34,7 @@ export default function useRepoContent(repoFullName: string | null, path: string
         const endpoint = path ? 'GET /repos/{owner}/{repo}/contents/{path}' : 'GET /repos/{owner}/{repo}/contents';
         const params: any = { owner, repo };
         if (path) params.path = path;
+        if (branch) params.ref = branch;
         const response = await octokit.request(endpoint as any, params);
         cacheRef.current[key] = response.data;
         setContent(response.data);
@@ -46,7 +47,7 @@ export default function useRepoContent(repoFullName: string | null, path: string
     };
 
     fetchContent();
-  }, [repoFullName, path, session, key, providedToken, octokit]);
+  }, [repoFullName, path, session, key, providedToken, octokit, branch]);
 
   return { content, isLoading, error };
 }

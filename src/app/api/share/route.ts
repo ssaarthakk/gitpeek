@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const { repoFullName, expiresIn, password, isOneTime, allowCopying, requireEmail } = await request.json();
+  const { repoFullName, expiresIn, password, isOneTime, allowCopying, requireEmail, ref, rootPath } = await request.json();
   if (!repoFullName || typeof repoFullName !== 'string') {
     return new NextResponse(JSON.stringify({ error: "Repository name not provided" }), { status: 400 });
   }
@@ -46,7 +46,6 @@ export async function POST(request: Request) {
         });
 
         if (!user || user.credits <= 0) {
-          // By throwing an error here, the transaction will be rolled back.
           throw new Error("Insufficient credits.");
         }
 
@@ -63,7 +62,9 @@ export async function POST(request: Request) {
             hashedPassword: hashedPassword,
             isOneTime: !!isOneTime,
             allowCopying: allowCopying ?? false,
-            requireEmail: !!requireEmail
+            requireEmail: !!requireEmail,
+            ref: ref || "main",
+            rootPath: rootPath || null,
           },
         });
 

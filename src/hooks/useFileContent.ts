@@ -10,14 +10,14 @@ type FileContentResult = {
   isLoading: boolean;
 };
 
-export default function useFileContent(repoFullName: string, filePath: string | null, providedToken?: string): FileContentResult {
+export default function useFileContent(repoFullName: string, filePath: string | null, providedToken?: string, branch?: string): FileContentResult {
   const { data: session } = useSession();
   const octokit = useOctokit(providedToken || session?.accessToken);
   const [content, setContent] = useState<string | null>(null);
   const [raw, setRaw] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const cacheRef = useRef<Record<string, { decoded: string; raw: string }>>({});
-  const key = `${repoFullName}::${filePath || ''}`;
+  const key = `${repoFullName}::${filePath || ''}::${branch || 'main'}`;
 
   useEffect(() => {
     const fetchFile = async () => {
@@ -33,14 +33,20 @@ export default function useFileContent(repoFullName: string, filePath: string | 
         setIsLoading(true);
         const [owner, repo] = repoFullName.split('/');
         try {
-          const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', { owner, repo, path: filePath });
+          const params: any = { owner, repo, path: filePath };
+          if (branch) params.ref = branch;
+          const { data } = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', params);
           if ('content' in data && 'encoding' in data && data.encoding === 'base64') {
             const rawBase64 = data.content.replace(/\n/g, '');
             let decodedContent = '';
             try {
-              decodedContent = atob(rawBase64);
+              decodedContent = decodeURIComponent(escape(atob(rawBase64))); // better unicode support
             } catch {
-              decodedContent = '';
+              try {
+                decodedContent = atob(rawBase64);
+              } catch {
+                decodedContent = '';
+              }
             }
             cacheRef.current[key] = { decoded: decodedContent, raw: rawBase64 };
             setContent(decodedContent);
@@ -55,7 +61,7 @@ export default function useFileContent(repoFullName: string, filePath: string | 
     };
 
     fetchFile();
-  }, [filePath, repoFullName, session, key, octokit, providedToken]);
+  }, [filePath, repoFullName, session, key, octokit, providedToken, branch]);
 
   return { content, raw, isLoading };
 }

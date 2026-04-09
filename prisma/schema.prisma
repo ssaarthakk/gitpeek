@@ -68,6 +68,8 @@ model ShareLink {
   isOneTime      Boolean    @default(false)
   allowCopying   Boolean    @default(false)
   requireEmail   Boolean    @default(false)
+  ref            String     @default("main")
+  rootPath       String?
 }
 
 model LinkView {

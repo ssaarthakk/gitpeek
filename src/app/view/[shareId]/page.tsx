@@ -122,6 +122,7 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
                 isPasswordProtected={isPasswordProtected}
                 isInitiallyVerified={false}
                 allowCopying={shareLink.allowCopying}
+                branch={shareLink.ref}
             />
         );
     } catch (error) {
