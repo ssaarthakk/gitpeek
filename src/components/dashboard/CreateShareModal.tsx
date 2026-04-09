@@ -19,7 +19,7 @@ type CreateShareModalProps = {
     selectedRepo: string;
     selectedExpiry: string;
     setSelectedExpiry: (expiry: string) => void;
-    onCreateShareLink: (password?: string, isOneTime?: boolean, allowCopying?: boolean) => void;
+    onCreateShareLink: (password?: string, isOneTime?: boolean, allowCopying?: boolean, requireEmail?: boolean) => void;
     isCreating: boolean;
 };
 
@@ -36,6 +36,7 @@ export default function CreateShareModal({
     const [password, setPassword] = useState('');
     const [isOneTime, setIsOneTime] = useState(false);
     const [allowCopying, setAllowCopying] = useState(false);
+    const [requireEmail, setRequireEmail] = useState(false);
 
     const [wasCreating, setWasCreating] = useState(false);
     if (isCreating && !wasCreating) setWasCreating(true);
@@ -44,14 +45,15 @@ export default function CreateShareModal({
         setPassword('');
         setIsOneTime(false);
         setAllowCopying(true);
+        setRequireEmail(false);
         setWasCreating(false);
     }
 
     const handleCreate = () => {
         if (passwordProtected && password) {
-            onCreateShareLink(password, isOneTime, allowCopying);
+            onCreateShareLink(password, isOneTime, allowCopying, requireEmail);
         } else {
-            onCreateShareLink(undefined, isOneTime, allowCopying);
+            onCreateShareLink(undefined, isOneTime, allowCopying, requireEmail);
         }
     };
 
@@ -65,6 +67,7 @@ export default function CreateShareModal({
                     setPassword('');
                     setIsOneTime(false);
                     setAllowCopying(true);
+                    setRequireEmail(false);
                 }
             }}
             classNames={{
@@ -229,6 +232,26 @@ export default function CreateShareModal({
                                         <Switch
                                             isSelected={allowCopying}
                                             onValueChange={setAllowCopying}
+                                            classNames={{
+                                                wrapper: "group-data-[selected=true]:bg-indigo-600"
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-medium text-white">
+                                                Require Email to View (Analytics)
+                                            </label>
+                                            <p className="text-xs text-white/50 mt-1">
+                                                Viewers will need to verify their email address before accessing the repository
+                                            </p>
+                                        </div>
+                                        <Switch
+                                            isSelected={requireEmail}
+                                            onValueChange={setRequireEmail}
                                             classNames={{
                                                 wrapper: "group-data-[selected=true]:bg-indigo-600"
                                             }}

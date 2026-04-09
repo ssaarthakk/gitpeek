@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const { repoFullName, expiresIn, password, isOneTime, allowCopying } = await request.json();
+  const { repoFullName, expiresIn, password, isOneTime, allowCopying, requireEmail } = await request.json();
   if (!repoFullName || typeof repoFullName !== 'string') {
     return new NextResponse(JSON.stringify({ error: "Repository name not provided" }), { status: 400 });
   }
@@ -27,47 +27,48 @@ export async function POST(request: Request) {
   }
 
   let hashedPassword: string | null = null;
-  if (password && typeof password === 'string'&& password.length > 0) {
+  if (password && typeof password === 'string' && password.length > 0) {
     const salt = await bcrypt.genSalt(10);
     hashedPassword = await bcrypt.hash(password, salt);
   }
 
   try {
-  const newShareLink = await prisma.$transaction(
-    async (
-      tx: Omit<
-        PrismaClient,
-        "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
-      >
-    ) => {
+    const newShareLink = await prisma.$transaction(
+      async (
+        tx: Omit<
+          PrismaClient,
+          "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+        >
+      ) => {
 
-      const user = await tx.user.findUnique({
-        where: { id: session.user!.id },
+        const user = await tx.user.findUnique({
+          where: { id: session.user!.id },
+        });
+
+        if (!user || user.credits <= 0) {
+          // By throwing an error here, the transaction will be rolled back.
+          throw new Error("Insufficient credits.");
+        }
+
+        await tx.user.update({
+          where: { id: session.user!.id },
+          data: { credits: { decrement: 1 } },
+        });
+
+        const shareLink = await tx.shareLink.create({
+          data: {
+            repoFullName: repoFullName,
+            userId: session.user!.id as string,
+            expiresAt: expiresAt,
+            hashedPassword: hashedPassword,
+            isOneTime: !!isOneTime,
+            allowCopying: allowCopying ?? false,
+            requireEmail: !!requireEmail
+          },
+        });
+
+        return shareLink;
       });
-
-      if (!user || user.credits <= 0) {
-        // By throwing an error here, the transaction will be rolled back.
-        throw new Error("Insufficient credits.");
-      }
-
-      await tx.user.update({
-        where: { id: session.user!.id },
-        data: { credits: { decrement: 1 } },
-      });
-
-      const shareLink = await tx.shareLink.create({
-        data: {
-          repoFullName: repoFullName,
-          userId: session.user!.id as string,
-          expiresAt: expiresAt,
-          hashedPassword: hashedPassword,
-          isOneTime: !!isOneTime,
-          allowCopying: allowCopying ?? false,
-        },
-      });
-
-      return shareLink;
-    });
 
     return new NextResponse(JSON.stringify(newShareLink), { status: 201 });
 

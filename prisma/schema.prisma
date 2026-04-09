@@ -67,6 +67,7 @@ model ShareLink {
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   isOneTime      Boolean    @default(false)
   allowCopying   Boolean    @default(false)
+  requireEmail   Boolean    @default(false)
 }
 
 model LinkView {
@@ -75,5 +76,6 @@ model LinkView {
   userAgent   String?
   ipAddress   String?
   shareLinkId String
+  viewerEmail String?
   shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
 }

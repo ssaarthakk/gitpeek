@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
 import { createInstallationToken } from '@/lib/github';
 import ProtectedRepoView from '@/components/ProtectedRepoView';
-import { headers } from 'next/headers';
+import EmailVerificationForm from '@/components/verifyEmail/EmailVerificationForm';
+import { headers, cookies } from 'next/headers';
 import { Metadata } from 'next';
 import { cache } from 'react';
 
@@ -67,6 +68,13 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
         );
     }
 
+    const cookieStore = await cookies();
+    const viewerEmail = cookieStore.get('gitpeek_viewer_email')?.value;
+
+    if (shareLink.requireEmail && !viewerEmail) {
+        return <EmailVerificationForm shareId={shareLink.id} />;
+    }
+
     try {
         const headersList = await headers();
         const userAgent = headersList.get('user-agent');
@@ -79,6 +87,7 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
                 shareLinkId: shareLink.id,
                 userAgent: userAgent,
                 ipAddress: ipAddress,
+                viewerEmail: viewerEmail || null,
             },
         }).catch((err: any) => console.error("Failed to log view:", err)); // Log errors
     } catch (error) {
