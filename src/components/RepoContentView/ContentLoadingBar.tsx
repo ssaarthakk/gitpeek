@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type ContentLoadingBarProps = {
   isLoading: boolean;
@@ -11,22 +11,11 @@ export default function ContentLoadingBar({ isLoading }: ContentLoadingBarProps)
     <AnimatePresence>
       {isLoading && (
         <motion.div
-          className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-sky-500 z-10"
-          initial={{ scaleX: 0, transformOrigin: 'left' }}
-          animate={{ 
-            scaleX: [0, 0.7, 0.7, 1],
-            transformOrigin: ['left', 'left', 'right', 'right']
-          }}
-          exit={{ 
-            scaleX: 1, 
-            transformOrigin: 'right',
-            transition: { duration: 0.2 }
-          }}
-          transition={{ 
-            duration: 2,
-            times: [0, 0.7, 0.9, 1],
-            ease: 'easeInOut'
-          }}
+          className="absolute top-0 left-0 right-0 h-[2px] bg-[#2f81f7] z-50 origin-left"
+          initial={{ scaleX: 0, opacity: 1 }}
+          animate={{ scaleX: [0, 0.4, 0.8, 1], opacity: [1, 1, 1, 0.5] }}
+          transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
+          exit={{ scaleX: 1, opacity: 0, transition: { duration: 0.3 } }}
         />
       )}
     </AnimatePresence>
