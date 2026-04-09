@@ -1,26 +1,34 @@
 'use client';
 
-import { useFormStatus } from 'react-dom';
-import { verifyViewerEmail } from '@/app/actions/verifyEmail';
-import { Input, Button, Card, CardBody } from '@heroui/react';
+import { useTransition, useEffect, useState } from 'react';
+import { verifyViewerEmail } from '@/actions/verifyEmail';
+import { Input, Button, Card, CardBody, Spinner } from '@heroui/react';
 import { EnvelopeIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
-// A small submit button component to handle the loading state automatically
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <Button
-            type="submit"
-            color="primary"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 font-medium mt-2"
-            isLoading={pending}
-        >
-            {pending ? 'Verifying...' : 'View Repository'}
-        </Button>
-    );
-}
-
 export default function EmailVerificationForm({ shareId }: { shareId: string }) {
+    const [isPending, startTransition] = useTransition();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        startTransition(() => {
+            verifyViewerEmail(formData);
+        });
+    };
+
+    if (!mounted) {
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-[#0b0f14] via-[#14181e] to-[#0b0f14]">
+                 <Spinner color="primary" size="lg" />
+            </div>
+        );
+    }
+
     return (
         <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-[#0b0f14] via-[#14181e] to-[#0b0f14]">
             <Card className="w-full max-w-md bg-[#161b22] border border-white/10">
@@ -39,8 +47,8 @@ export default function EmailVerificationForm({ shareId }: { shareId: string }) 
                         </div>
                     </div>
 
-                    <form action={verifyViewerEmail} className="space-y-4">
-                        <input type="hidden" name="shareId" value={shareId} />
+                    <form onSubmit={handleSubmit} className="space-y-4" suppressHydrationWarning>
+                        <input type="hidden" name="shareId" defaultValue={shareId} />
 
                         <Input
                             type="email"
@@ -49,6 +57,8 @@ export default function EmailVerificationForm({ shareId }: { shareId: string }) 
                             label="Email Address"
                             placeholder="recruiter@company.com"
                             isRequired
+                            autoComplete="email"
+                            suppressHydrationWarning
                             classNames={{
                                 inputWrapper: 'bg-white/10 border-white/20',
                                 input: 'text-white',
@@ -59,7 +69,14 @@ export default function EmailVerificationForm({ shareId }: { shareId: string }) 
                             }
                         />
 
-                        <SubmitButton />
+                        <Button
+                            type="submit"
+                            color="primary"
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 font-medium mt-2"
+                            isLoading={isPending}
+                        >
+                            {isPending ? 'Verifying...' : 'View Repository'}
+                        </Button>
                     </form>
                 </CardBody>
             </Card>
