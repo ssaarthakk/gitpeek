@@ -14,6 +14,8 @@ import RepositorySelector from './RepositorySelector';
 import ShareLinksTable from './ShareLinksTable';
 import CreateShareModal from './CreateShareModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import PendingRequestsTable from './PendingRequestsTable';
+import { getPendingRequests } from '@/actions/getPendingRequests';
 
 type DashboardContentProps = {
     session: Session;
@@ -45,6 +47,22 @@ export default function DashboardContent({
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCreatingShare, setIsCreatingShare] = useState(false);
     const [selectedExpiry, setSelectedExpiry] = useState<string>('never');
+    const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+    const fetchPendingRequests = useCallback(async () => {
+        if (session?.user?.id) {
+            try {
+                const reqs = await getPendingRequests(session.user.id);
+                setPendingRequests(reqs);
+            } catch (error) {
+                console.error("Failed to fetch pending requests", error);
+            }
+        }
+    }, [session?.user?.id]);
+
+    useEffect(() => {
+        fetchPendingRequests();
+    }, [fetchPendingRequests]);
     
     // Modal controls
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -161,6 +179,18 @@ export default function DashboardContent({
             </div>
 
             <Spacer y={4} />
+
+            {pendingRequests.length > 0 && (
+                <section>
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
+                            {pendingRequests.length} New
+                        </span>
+                        Access Requests
+                    </h2>
+                    <PendingRequestsTable requests={pendingRequests} />
+                </section>
+            )}
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
