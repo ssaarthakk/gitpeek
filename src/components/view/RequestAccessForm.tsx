@@ -1,37 +1,37 @@
 'use client'
 
-import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useEffect } from 'react';
 import { submitAccessRequest } from '@/actions/requestAccess';
 import { Input, Textarea, Button } from "@heroui/react";
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      color="primary"
-      isLoading={pending}
-      className="w-full mt-4 font-semibold shadow-lg shadow-primary/20"
-      size="lg"
-    >
-      Request Access
-    </Button>
-  );
-}
 
 export default function RequestAccessForm({ shareId }: { shareId: string }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const handleAction = async (formData: FormData) => {
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError('');
-    const result = await submitAccessRequest(formData);
+    setIsLoading(true);
 
-    if (result?.error) {
-      setError(result.error);
-    } else if (result?.success) {
-      setIsSubmitted(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await submitAccessRequest(formData);
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.success) {
+        setIsSubmitted(true);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,43 +64,64 @@ export default function RequestAccessForm({ shareId }: { shareId: string }) {
             This repository link has expired or reached its view limit. Request a new link directly from the developer by filling out the form below.
           </p>
 
-          <form action={handleAction} className="space-y-5">
-            <input type="hidden" name="shareId" value={shareId} />
+          {isMounted ? (
+            <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off">
+              <input type="hidden" name="shareId" value={shareId} />
 
-            <Input
-              type="email"
-              name="email"
-              label="Your Email"
-              placeholder="you@company.com"
-              isRequired
-              variant="bordered"
-              classNames={{
-                label: "text-white/80",
-                input: "text-white placeholder:text-white/30",
-                inputWrapper: "border-white/10 hover:border-white/20 focus-within:border-primary/50 bg-white/5 group-data-[focus=true]:border-primary/50"
-              }}
-            />
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                label="Your Email"
+                placeholder="you@company.com"
+                isRequired
+                variant="bordered"
+                data-1p-ignore="true"
+                data-lpignore="true"
+                autoComplete="off"
+                classNames={{
+                  label: "text-white/80",
+                  input: "text-white placeholder:text-white/30",
+                  inputWrapper: "border-white/10 hover:border-white/20 focus-within:border-primary/50 bg-white/5 group-data-[focus=true]:border-primary/50"
+                }}
+              />
 
-            <Textarea
-              name="message"
-              label="Message (Optional)"
-              placeholder="Hi, I'd like to access this repository to review your code..."
-              variant="bordered"
-              classNames={{
-                label: "text-white/80",
-                input: "text-white placeholder:text-white/30",
-                inputWrapper: "border-white/10 hover:border-white/20 focus-within:border-primary/50 bg-white/5 group-data-[focus=true]:border-primary/50"
-              }}
-            />
+              <Textarea
+                id="message"
+                name="message"
+                label="Message (Optional)"
+                placeholder="Hi, I'd like to access this repository to review your code..."
+                variant="bordered"
+                classNames={{
+                  label: "text-white/80",
+                  input: "text-white placeholder:text-white/30",
+                  inputWrapper: "border-white/10 hover:border-white/20 focus-within:border-primary/50 bg-white/5 group-data-[focus=true]:border-primary/50"
+                }}
+              />
 
-            {error && (
-              <div className="p-3 rounded-lg bg-danger/10 border border-danger/20">
-                <p className="text-danger text-sm">{error}</p>
-              </div>
-            )}
+              {error && (
+                <div className="p-3 rounded-lg bg-danger/10 border border-danger/20">
+                  <p className="text-danger text-sm">{error}</p>
+                </div>
+              )}
 
-            <SubmitButton />
-          </form>
+              <Button
+                type="submit"
+                color="primary"
+                isLoading={isLoading}
+                className="w-full mt-4 font-semibold shadow-lg shadow-primary/20"
+                size="lg"
+              >
+                Request Access
+              </Button>
+            </form>
+          ) : (
+             <div className="space-y-5 opacity-0">
+                <div className="h-[52px] w-full bg-white/5 rounded-medium"></div>
+                <div className="h-[76px] w-full bg-white/5 rounded-medium"></div>
+                <div className="h-[56px] w-full mt-4 bg-white/5 rounded-large"></div>
+             </div>
+          )}
         </div>
       </div>
     </div>

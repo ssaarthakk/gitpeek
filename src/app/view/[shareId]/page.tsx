@@ -54,11 +54,11 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
     const isOneTimeExhausted = shareLink.isOneTime && shareLink._count.linkViews >= 1;
 
     if (isExpired || isOneTimeExhausted) {
-        if (isOneTimeExhausted) {
-            prisma.shareLink.delete({ where: { id: shareLink.id } }).catch(err =>
-                console.error("Failed to clean up one-time link:", err)
-            );
-        }
+        // if (isOneTimeExhausted) {
+        //     prisma.shareLink.delete({ where: { id: shareLink.id } }).catch(err =>
+        //         console.error("Failed to clean up one-time link:", err)
+        //     );
+        // }
         return <RequestAccessForm shareId={shareLink.id} />;
     }
 

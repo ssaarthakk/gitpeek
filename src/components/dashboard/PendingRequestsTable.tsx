@@ -21,6 +21,24 @@ export default function PendingRequestsTable({ requests }: { requests: any[] }) 
         setLoadingId(null);
     };
 
+    if (!requests || requests.length === 0) {
+        return (
+            <Card className="bg-white/5 border border-white/10 shadow-sm w-full">
+                <CardBody className="flex flex-col items-center justify-center py-12 text-center relative overflow-hidden">
+                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10 relative z-10">
+                        <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-white mb-2 relative z-10">No Pending Requests</h3>
+                    <p className="text-white/50 text-sm max-w-sm relative z-10">
+                        When users request access to an expired or exhausted link, their requests will appear here for your review.
+                    </p>
+                </CardBody>
+            </Card>
+        );
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {requests.map((request) => (
@@ -39,7 +57,7 @@ export default function PendingRequestsTable({ requests }: { requests: any[] }) 
                                 {request.message && (
                                     <div className="mt-3 bg-white/5 rounded-lg p-3 border border-white/5 border-l-2 border-l-primary/50">
                                         <p className="text-sm text-white/70 italic">
-                                            "{request.message}"
+                                            &quot;{request.message}&quot;
                                         </p>
                                     </div>
                                 )}

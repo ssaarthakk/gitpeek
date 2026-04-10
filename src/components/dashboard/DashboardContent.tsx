@@ -180,17 +180,17 @@ export default function DashboardContent({
 
             <Spacer y={4} />
 
-            {pendingRequests.length > 0 && (
-                <section>
-                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
+            <section>
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
+                    {pendingRequests.length > 0 && (
                         <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full shadow-lg shadow-red-500/20">
                             {pendingRequests.length} New
                         </span>
-                        Access Requests
-                    </h2>
-                    <PendingRequestsTable requests={pendingRequests} />
-                </section>
-            )}
+                    )}
+                    Access Requests
+                </h2>
+                <PendingRequestsTable requests={pendingRequests} />
+            </section>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

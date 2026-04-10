@@ -92,4 +92,5 @@ model AccessRequest {
 
   shareLinkId String
   shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
+  @@unique([shareLinkId, viewerEmail])
 }
