@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { createInstallationToken } from '@/lib/github';
 import ProtectedRepoView from '@/components/ProtectedRepoView';
 import EmailVerificationForm from '@/components/verifyEmail/EmailVerificationForm';
+import RequestAccessForm from '@/components/view/RequestAccessForm';
 import { headers, cookies } from 'next/headers';
 import { Metadata } from 'next';
 import { cache } from 'react';
@@ -41,31 +42,24 @@ export default async function SharePageView({ params }: { params: Promise<{ shar
 
 
 
-    if (!shareLink || (shareLink.expiresAt && shareLink.expiresAt < new Date())) {
+    if (!shareLink) {
         return (
             <div className="flex h-screen w-screen items-center justify-center">
-                <h1 className="font-bold text-2xl">Link not found or has expired. Please request a new link.</h1>
+                <h1 className="font-bold text-2xl">Link not found.</h1>
             </div>
         );
     }
 
-    const viewCount = shareLink._count.linkViews;
+    const isExpired = shareLink.expiresAt ? new Date() > shareLink.expiresAt : false;
+    const isOneTimeExhausted = shareLink.isOneTime && shareLink._count.linkViews >= 1;
 
-    if (shareLink.isOneTime && viewCount > 0) {
-        // This link has been viewed before. It is now invalid.
-        // We can delete it in the background to clean up the DB.
-        prisma.shareLink.delete({ where: { id: shareLink.id } }).catch(err =>
-            console.error("Failed to clean up one-time link:", err)
-        );
-        return (
-            <div className="flex h-screen w-screen items-center justify-center">
-                <div className="rounded-xl shadow-2xl bg-white/5 p-8 flex flex-col items-center border border-white/10 max-w-md w-full">
-                    <h1 className="font-bold text-2xl text-white mb-3 text-center">This link has been used and is no longer valid.</h1>
-                    <p className="text-white/70 text-center mb-2">For security, one-time links can only be viewed once.</p>
-                    <p className="text-white/40 text-center text-sm">Please request a new link if you need access again.</p>
-                </div>
-            </div>
-        );
+    if (isExpired || isOneTimeExhausted) {
+        if (isOneTimeExhausted) {
+            prisma.shareLink.delete({ where: { id: shareLink.id } }).catch(err =>
+                console.error("Failed to clean up one-time link:", err)
+            );
+        }
+        return <RequestAccessForm shareId={shareLink.id} />;
     }
 
     const cookieStore = await cookies();

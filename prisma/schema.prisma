@@ -57,19 +57,20 @@ model VerificationToken {
 }
 
 model ShareLink {
-  id             String     @id @default(cuid())
+  id             String          @id @default(cuid())
   repoFullName   String
-  createdAt      DateTime   @default(now())
+  createdAt      DateTime        @default(now())
   expiresAt      DateTime?
   hashedPassword String?
   linkViews      LinkView[]
   userId         String
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isOneTime      Boolean    @default(false)
-  allowCopying   Boolean    @default(false)
-  requireEmail   Boolean    @default(false)
-  ref            String     @default("main")
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isOneTime      Boolean         @default(false)
+  allowCopying   Boolean         @default(false)
+  requireEmail   Boolean         @default(false)
+  ref            String          @default("main")
   rootPath       String?
+  accessRequests AccessRequest[]
 }
 
 model LinkView {
@@ -79,5 +80,16 @@ model LinkView {
   ipAddress   String?
   shareLinkId String
   viewerEmail String?
+  shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
+}
+
+model AccessRequest {
+  id          String   @id @default(cuid())
+  viewerEmail String
+  message     String?  @db.Text
+  status      String   @default("pending") // Can be "pending", "approved", or "ignored"
+  createdAt   DateTime @default(now())
+
+  shareLinkId String
   shareLink   ShareLink @relation(fields: [shareLinkId], references: [id], onDelete: Cascade)
 }
