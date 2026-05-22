@@ -20,7 +20,7 @@ export async function getFreshAccessToken(account: Account) {
             "https://github.com/login/oauth/access_token",
             new URLSearchParams({
                 client_id: process.env.AUTH_GITHUB_ID!,
-                client_secret: process.env.GITHUB_CLIENT_SECRET!,
+                client_secret: process.env.AUTH_GITHUB_SECRET!,
                 grant_type: "refresh_token",
                 refresh_token: account.refresh_token,
             }),
