@@ -3,6 +3,21 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from './lib/prisma';
 import { authConfig } from './auth.config';
 
+const prismaAdapter = PrismaAdapter(prisma);
+
+// GitHub App tokens come back with `refresh_token_expires_in`, which the Account
+// model has no column for. Passing it through makes Prisma throw on first sign-in.
+const adapter: typeof prismaAdapter = {
+  ...prismaAdapter,
+  linkAccount: (account) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { refresh_token_expires_in, ...rest } = account as typeof account & {
+      refresh_token_expires_in?: number;
+    };
+    return prismaAdapter.linkAccount!(rest);
+  },
+};
+
 export const {
   handlers,
   signIn,
@@ -53,5 +68,5 @@ export const {
       return !!auth;
     }
   },
-  adapter: PrismaAdapter(prisma),
+  adapter,
 });
