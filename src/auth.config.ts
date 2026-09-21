@@ -7,6 +7,9 @@ export const authConfig = {
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
       clientSecret: process.env.AUTH_GITHUB_SECRET,
+      // GitHub sends `iss` on the OAuth callback (RFC 9207). Without this,
+      // Auth.js compares it against its placeholder issuer and rejects the callback.
+      issuer: "https://github.com/login/oauth",
       authorization: {
         params: {
           scope: "repo read:user user:email",
