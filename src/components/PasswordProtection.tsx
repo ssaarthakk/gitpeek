@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Input, Button, Card, CardBody } from '@heroui/react';
-import { EyeIcon, EyeSlashIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import GateShell, { ErrorLine, Spinner, inputClass, primaryButtonClass } from '@/components/view/GateShell';
 
 type PasswordProtectionProps = {
   shareId: string;
   onSuccess: () => void;
+  repoFullName?: string;
 };
 
-export default function PasswordProtection({ shareId, onSuccess }: PasswordProtectionProps) {
+export default function PasswordProtection({ shareId, onSuccess, repoFullName }: PasswordProtectionProps) {
   const [password, setPassword] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [error, setError] = useState('');
@@ -52,68 +53,50 @@ export default function PasswordProtection({ shareId, onSuccess }: PasswordProte
   };
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-[#0b0f14] via-[#14181e] to-[#0b0f14]">
-      <Card className="w-full max-w-md bg-[#161b22] border border-white/10">
-        <CardBody className="gap-6 p-8">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-16 w-16 rounded-full bg-indigo-500/20 flex items-center justify-center">
-              <LockClosedIcon className="h-8 w-8 text-indigo-400" />
-            </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-white mb-2">
-                Password Protected
-              </h1>
-              <p className="text-white/70 text-sm">
-                This repository is password protected. Please enter the password to continue.
-              </p>
-            </div>
-          </div>
+    <GateShell
+      repoFullName={repoFullName}
+      status="Password required"
+      statusTone="accent"
+      icon="lock"
+      tone="accent"
+      title="This link needs a password."
+      blurb="The person who shared this repository set a password. They should have sent it to you separately."
+      foot="Don't have the password? Ask the person who shared the link."
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <label htmlFor="gate-password" className="sr-only">
+          Password
+        </label>
+        <div className="relative">
+          <input
+            id="gate-password"
+            type={isVisible ? 'text' : 'password'}
+            placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
+            autoComplete="current-password"
+            autoFocus
+            aria-invalid={!!error}
+            aria-describedby={error ? 'gate-password-error' : undefined}
+            className={`${inputClass} pr-12 aria-invalid:border-danger`}
+          />
+          <button
+            type="button"
+            onClick={toggleVisibility}
+            aria-label={isVisible ? 'Hide password' : 'Show password'}
+            className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-hover hover:text-ink"
+          >
+            {isVisible ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+          </button>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type={isVisible ? 'text' : 'password'}
-              label="Password"
-              placeholder="Enter password"
-              value={password}
-              onChange={handlePasswordChange}
-              isInvalid={!!error}
-              errorMessage={error}
-              classNames={{
-                inputWrapper: 'bg-white/10 border-white/20',
-                input: 'text-white',
-                label: 'text-white/70',
-              }}
-              endContent={
-                <button
-                  className="focus:outline-none"
-                  type="button"
-                  onClick={toggleVisibility}
-                >
-                  {isVisible ? (
-                    <EyeSlashIcon className="h-5 w-5 text-white/50 pointer-events-none" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-white/50 pointer-events-none" />
-                  )}
-                </button>
-              }
-            />
+        {error && <ErrorLine id="gate-password-error">{error}</ErrorLine>}
 
-            <Button
-              type="submit"
-              color="primary"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 font-medium"
-              isLoading={isVerifying}
-              isDisabled={!password}
-            >
-              {isVerifying ? 'Verifying...' : 'Unlock Repository'}
-            </Button>
-          </form>
-
-          <div className="text-center text-xs text-white/50">
-            <p>Don&apos;t have the password? Contact the repository owner.</p>
-          </div>
-        </CardBody>
-      </Card>
-    </div>
+        <button type="submit" disabled={!password || isVerifying} className={primaryButtonClass}>
+          {isVerifying && <Spinner />}
+          {isVerifying ? 'Checking…' : 'Unlock'}
+        </button>
+      </form>
+    </GateShell>
   );
 }

@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'GitPeek - Billing',
-  description: 'Manage your GitPeek subscription and credits. Purchase additional credits to create more share links and control your repository sharing preferences.',
+  title: 'Billing — GitPeek',
+  description: 'Your GitPeek credit balance, and how to add more. Each credit creates one share link.',
 };
 
 export default function BillingLayout({

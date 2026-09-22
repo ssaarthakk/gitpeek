@@ -1,27 +1,28 @@
 'use client';
-import { Button } from "@heroui/button";
 import { signOut } from "next-auth/react";
-import Image from "next/image";
 import { useState } from "react";
 
-export default function LogoutButton() {
+export default function LogoutButton({ className = "" }: { className?: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
     setLoading(true);
     try {
-      await signOut();
+      await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Error signing out:", error);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Button isLoading={loading} onClickCapture={handleSignOut} radius="sm" size="md" disabled={loading} >
-      <Image src="/icons/SignoutLogo.svg" alt="Logo" width={20} height={20} /> 
-      Sign out
-    </Button>
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={loading}
+      className={`rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink-2 hover:bg-hover hover:text-ink disabled:opacity-60 ${className}`}
+    >
+      {loading ? "Signing out…" : "Sign out"}
+    </button>
   );
 }

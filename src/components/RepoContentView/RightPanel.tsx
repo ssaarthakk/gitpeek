@@ -1,11 +1,17 @@
-import { BreadcrumbItem, Breadcrumbs } from "@heroui/breadcrumbs";
+'use client';
+
+import { Fragment, useEffect, useRef } from "react";
 import ContentLoadingBar from "./ContentLoadingBar";
 import { renderFileContent } from "./FileRenderer";
+import { CodeSkeleton, RightDirSkeleton } from "./Skeletons";
+import { fileKindLabel, formatBytes, isImage, isMarkdown } from "./utils";
 import { FileDirectoryFillIcon, FileIcon } from "@primer/octicons-react";
+import { Chip } from "@/components/kit";
 
 type RightPanelProps = {
     selectedPath: string | null;
     selectedType: 'file' | 'dir' | null;
+    selectedSize?: number | null;
     rightDirContent: any[];
     isRightDirLoading: boolean;
     rightDirError: any;
@@ -15,11 +21,13 @@ type RightPanelProps = {
     selectItem: (item: any) => void;
     setSelectedPath: (path: string) => void;
     setSelectedType: (type: 'file' | 'dir') => void;
+    allowCopying?: boolean;
 };
 
 export default function RightPanel({
     selectedPath,
     selectedType,
+    selectedSize,
     rightDirContent,
     isRightDirLoading,
     rightDirError,
@@ -28,108 +36,177 @@ export default function RightPanel({
     isRightFileLoading,
     selectItem,
     setSelectedPath,
-    setSelectedType
+    setSelectedType,
+    allowCopying,
 }: RightPanelProps) {
 
     const rightDirSorted = Array.isArray(rightDirContent)
         ? [...rightDirContent].sort((a: any, b: any) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'dir' ? -1 : 1))
         : [];
 
+    const segments = selectedPath ? selectedPath.split('/').filter(Boolean) : [];
+
+    const isFile = selectedType === 'file' && !!selectedPath;
+    const isDir = selectedType === 'dir' && !!selectedPath;
+
+    // Long paths scroll inside the breadcrumb pill; keep the current item in view.
+    const crumbsRef = useRef<HTMLElement>(null);
+    useEffect(() => {
+        const el = crumbsRef.current;
+        if (el) el.scrollLeft = el.scrollWidth;
+    }, [selectedPath]);
+
+    let meta = '';
+    if (isFile) {
+        const parts = [];
+        if (typeof selectedSize === 'number') parts.push(formatBytes(selectedSize));
+        parts.push(fileKindLabel(selectedPath!));
+        meta = parts.join(' · ');
+    } else if (isDir) {
+        meta = 'folder';
+    }
+
+    let footRight = '';
+    if (isDir && rightDirContent && !isRightDirLoading) {
+        footRight = `${rightDirSorted.length} item${rightDirSorted.length === 1 ? '' : 's'}`;
+    } else if (isFile && rightFileContent && !isRightFileLoading) {
+        if (isImage(selectedPath!) && rightFileRaw) footRight = 'image';
+        else if (isMarkdown(selectedPath!)) footRight = 'rendered markdown';
+        else {
+            const lines = rightFileContent.split('\n').length;
+            footRight = `${lines} line${lines === 1 ? '' : 's'}`;
+        }
+    }
+
     return (
-        <div className="flex-1 flex flex-col rounded-md bg-[#0d1117] border border-[#30363d] overflow-hidden min-h-[320px] relative">
+        <section
+            className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[22px] border border-line bg-surface"
+            aria-label="File content"
+        >
             <ContentLoadingBar isLoading={isRightDirLoading || isRightFileLoading} />
-            <div className="px-5 py-3 bg-[#161b22] border-b border-[#30363d] flex flex-wrap items-center gap-4">
-                <div className="flex flex-col md:flex-row md:items-center md:gap-4 min-w-0 flex-1">
-                    <div className="flex items-center gap-2 min-w-0 mb-1 md:mb-0">
-                        <h3 className="text-sm font-semibold tracking-wide text-[#c9d1d9] whitespace-nowrap">
-                            {!selectedPath && 'No Selection'}
-                            {selectedType === 'file' && 'File Preview'}
-                            {selectedType === 'dir' && 'Folder Contents'}
-                        </h3>
-                        {(selectedType === 'dir' || (selectedType === 'file' && selectedPath)) && (
-                            <div className="max-w-full overflow-hidden">
-                                <Breadcrumbs size="sm" className="text-[13px]" itemClasses={{ item: 'text-[#2f81f7] hover:underline cursor-pointer', separator: 'text-[#8b949e]' }}>
-                                    {selectedPath?.split('/').filter(Boolean).map((segment, idx, arr) => {
-                                        const full = selectedPath.split('/').slice(0, idx + 1).join('/');
-                                        const isLast = idx === arr.length - 1;
-                                        return (
-                                            <BreadcrumbItem
-                                                key={full}
-                                                onClick={() => {
-                                                    if (!isLast) {
-                                                        setSelectedPath(full);
-                                                        setSelectedType('dir');
-                                                    }
-                                                }}
-                                                className={isLast ? 'text-[#c9d1d9] pointer-events-none font-semibold' : ''}
-                                            >{segment}</BreadcrumbItem>
-                                        );
-                                    })}
-                                </Breadcrumbs>
+
+            {/* toolbar */}
+            <div className="flex shrink-0 items-center gap-2 border-b border-line p-3">
+                <nav
+                    ref={crumbsRef}
+                    aria-label="Selected path"
+                    className="no-scrollbar flex h-10 min-w-0 flex-1 items-center gap-1 overflow-x-auto whitespace-nowrap rounded-full bg-surface-2 px-4"
+                >
+                    {segments.length === 0 && <span className="text-[13px] text-ink-4">No file selected</span>}
+                    {segments.map((segment, idx) => {
+                        const full = segments.slice(0, idx + 1).join('/');
+                        const isLast = idx === segments.length - 1;
+                        return (
+                            <Fragment key={full}>
+                                {idx > 0 && <span className="shrink-0 text-[13px] text-ink-4">/</span>}
+                                {isLast ? (
+                                    <span className="shrink-0 text-[13px] font-semibold text-ink" aria-current="page">{segment}</span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedPath(full);
+                                            setSelectedType('dir');
+                                        }}
+                                        className="shrink-0 text-[13px] text-ink-3 transition-colors hover:text-ink"
+                                    >
+                                        {segment}
+                                    </button>
+                                )}
+                            </Fragment>
+                        );
+                    })}
+                </nav>
+                {meta && (
+                    <span className="hidden shrink-0 sm:flex">
+                        <Chip className="tabular-nums">{meta}</Chip>
+                    </span>
+                )}
+                {!allowCopying && (
+                    <span className="hidden shrink-0 sm:flex" title="The owner turned off copying and downloads for this link.">
+                        <Chip tone="sun">Copy disabled</Chip>
+                    </span>
+                )}
+            </div>
+
+            {/* body */}
+            <div className="relative min-h-0 flex-1 overflow-hidden">
+                {!selectedPath && (
+                    <div className="flex h-full items-center justify-center p-4">
+                        <div className="hatch flex w-full max-w-md flex-col items-center gap-2 rounded-2xl px-6 py-12 text-center">
+                            <div className="text-lg font-semibold text-ink-2">Nothing selected</div>
+                            <div className="text-[13px] text-ink-3">
+                                <span className="md:hidden">Open the file list to pick a file.</span>
+                                <span className="hidden md:inline">Pick a file on the left.</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isDir && (
+                    <div className="custom-scrollbar absolute inset-0 overflow-y-auto">
+                        {rightDirError && !isRightDirLoading && (
+                            <p className="m-3 rounded-xl bg-danger-soft px-4 py-3 text-[13px] text-danger">Couldn&apos;t load this folder.</p>
+                        )}
+                        {isRightDirLoading && !rightDirError && <RightDirSkeleton />}
+                        {rightDirContent && !isRightDirLoading && rightDirSorted.length > 0 && (
+                            <div className="p-2 text-[13px]">
+                                <div
+                                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-3 py-2 text-xs text-ink-4 sm:grid-cols-[minmax(0,1fr)_96px] md:grid-cols-[minmax(0,1fr)_96px_96px]"
+                                >
+                                    <span>Name</span>
+                                    <span className="hidden md:block">Type</span>
+                                    <span className="hidden text-right sm:block">Size</span>
+                                </div>
+                                {rightDirSorted.map((child: any) => {
+                                    const childIsDir = child.type === 'dir';
+                                    return (
+                                        <button
+                                            key={child.sha}
+                                            type="button"
+                                           
+                                            onClick={() => selectItem(child)}
+                                            className="group grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-hover sm:grid-cols-[minmax(0,1fr)_96px] md:grid-cols-[minmax(0,1fr)_96px_96px]"
+                                        >
+                                            <span className="flex min-w-0 items-center gap-3">
+                                                <span className={childIsDir ? 'flex shrink-0 text-ink-3' : 'flex shrink-0 text-ink-4'}>
+                                                    {childIsDir ? <FileDirectoryFillIcon size={14} /> : <FileIcon size={14} />}
+                                                </span>
+                                                <span className="truncate text-ink-2 group-hover:text-ink" title={child.name}>{child.name}</span>
+                                            </span>
+                                            <span className="hidden text-xs text-ink-4 md:block">{childIsDir ? 'Folder' : 'File'}</span>
+                                            <span className="hidden text-right text-xs tabular-nums text-ink-4 sm:block">
+                                                {!childIsDir && typeof child.size === 'number' ? formatBytes(child.size) : ''}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
-                    </div>
-                </div>
-                {selectedType === 'dir' && selectedPath && (
-                    <div className="text-[12px] text-[#8b949e]">{rightDirSorted.length} items</div>
-                )}
-                {selectedType === 'file' && selectedPath && (
-                    <div className="text-[12px] text-[#8b949e]">{rightFileContent ? rightFileContent.split('\n').length : 0} lines</div>
-                )}
-            </div>
-            <div className="flex-1 relative overflow-hidden bg-[#0d1117]">
-                {!selectedPath && (
-                    <div className="h-full flex items-center justify-center text-sm text-[#8b949e]">Select a file or folder from the left.</div>
-                )}
-                {selectedType === 'dir' && selectedPath && (
-                    <div className="absolute inset-0 overflow-y-auto custom-scrollbar">
-                        {rightDirError && !isRightDirLoading && (
-                            <div className="text-[#f85149] text-xs mb-4 p-4">Error loading folder.</div>
-                        )}
-                        {rightDirContent && !isRightDirLoading && (
-                            <table className="w-full text-[14px]">
-                                <thead className="bg-[#161b22] border-b border-[#30363d] sticky top-0 z-10">
-                                    <tr className="text-[#8b949e]">
-                                        <th className="text-left font-semibold py-2 px-4">Name</th>
-                                        <th className="text-left font-semibold py-2 px-4 w-24 hidden md:table-cell">Type</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {rightDirSorted.map((child: any) => {
-                                        const isDir = child.type === 'dir';
-                                        return (
-                                            <tr
-                                                key={child.sha}
-                                                onClick={() => selectItem(child)}
-                                                className="group cursor-pointer hover:bg-[#161b22] border-b border-[#21262d] last:border-b-0"
-                                            >
-                                                <td className="py-2.5 px-4 flex items-center gap-3">
-                                                    <span className={`flex items-center justify-center shrink-0 ${isDir ? 'text-[#54aeff]' : 'text-[#8b949e]'}`}>
-                                                        {isDir ? <FileDirectoryFillIcon size={16} /> : <FileIcon size={16} />}
-                                                    </span>
-                                                    <span className="truncate text-[#c9d1d9] hover:text-[#2f81f7] hover:underline" title={child.name}>{child.name}</span>
-                                                </td>
-                                                <td className="py-2.5 px-4 text-[#8b949e] text-[12px] hidden md:table-cell">{isDir ? 'Folder' : 'File'}</td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        )}
-                        {rightDirContent && rightDirSorted.length === 0 && (
-                            <p className="text-center text-[13px] text-[#8b949e] mt-4">This folder is empty.</p>
+                        {rightDirContent && !isRightDirLoading && !rightDirError && rightDirSorted.length === 0 && (
+                            <div className="hatch m-3 rounded-2xl px-4 py-10 text-center text-[13px] text-ink-3">This folder is empty.</div>
                         )}
                     </div>
                 )}
-                {selectedType === 'file' && selectedPath && (
-                    <div className="absolute inset-0 overflow-auto custom-scrollbar">
-                        {rightFileContent && !isRightFileLoading && renderFileContent(selectedPath, rightFileContent, rightFileRaw)}
+
+                {isFile && (
+                    <div className="custom-scrollbar absolute inset-0 overflow-auto">
+                        {isRightFileLoading && <CodeSkeleton />}
+                        {rightFileContent && !isRightFileLoading && renderFileContent(selectedPath!, rightFileContent, rightFileRaw)}
                         {!isRightFileLoading && !rightFileContent && (
-                            <p className="p-4 text-[13px] text-[#8b949e]">No preview available.</p>
+                            <div className="hatch m-3 rounded-2xl px-4 py-10 text-center text-[13px] text-ink-3">No preview available for this file.</div>
                         )}
                     </div>
                 )}
             </div>
-        </div>
-    )
+
+            {/* footer */}
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-line px-5 py-2.5">
+                <span className="min-w-0 text-xs leading-snug text-ink-4">
+                    Read-only. Nothing you do here reaches the repository.
+                </span>
+                {footRight && <span className="shrink-0 text-xs tabular-nums text-ink-4">{footRight}</span>}
+            </div>
+        </section>
+    );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PasswordProtection from '@/components/PasswordProtection';
 import RepoContentView from '@/components/RepoContentView';
 
@@ -12,6 +12,10 @@ type ProtectedRepoViewProps = {
   isInitiallyVerified: boolean;
   allowCopying: boolean;
   branch?: string;
+  /** ISO timestamp, or null when the link never expires. */
+  expiresAt?: string | null;
+  isOneTime?: boolean;
+  sharedBy?: string | null;
 };
 
 export default function ProtectedRepoView({
@@ -21,7 +25,10 @@ export default function ProtectedRepoView({
   isPasswordProtected,
   isInitiallyVerified,
   allowCopying,
-  branch
+  branch,
+  expiresAt,
+  isOneTime,
+  sharedBy,
 }: ProtectedRepoViewProps) {
   const [isVerified, setIsVerified] = useState(isInitiallyVerified);
 
@@ -29,19 +36,23 @@ export default function ProtectedRepoView({
     return (
       <PasswordProtection
         shareId={shareId}
+        repoFullName={repoFullName}
         onSuccess={() => setIsVerified(true)}
       />
     );
   }
 
   return (
-    <main className="flex h-screen w-screen">
+    <main className="h-dvh w-full overflow-hidden bg-bg">
       <RepoContentView
         repoFullName={repoFullName}
         accessToken={accessToken}
         allowCopying={allowCopying}
         shareId={shareId}
         branch={branch}
+        expiresAt={expiresAt}
+        isOneTime={isOneTime}
+        sharedBy={sharedBy}
       />
     </main>
   );
