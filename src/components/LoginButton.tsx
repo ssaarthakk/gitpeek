@@ -1,29 +1,47 @@
 'use client';
-import { Button } from "@heroui/button";
-import { signIn } from "next-auth/react";
-import Image from "next/image";
+import Link from "next/link";
+import { signIn, useSession } from "next-auth/react";
 import { useState } from "react";
+import { GitHubMark } from "@/components/site/icons";
+import { buttonClass, cx } from "@/components/kit";
 
-export default function LoginButton() {
+type Props = {
+  /** `nav`: outlined secondary pill for headers. `primary`: large white pill for CTAs. */
+  variant?: "nav" | "primary";
+  callbackUrl?: string;
+  label?: string;
+  className?: string;
+};
+
+export default function LoginButton({ variant = "primary", callbackUrl = "/dashboard", label, className = "" }: Props) {
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
-  
+
+  const base = variant === "nav" ? buttonClass("secondary", "md") : buttonClass("primary", "lg");
+
+  if (session?.user) {
+    return (
+      <Link href="/dashboard" className={cx(base, "hover:no-underline", className)}>
+        Dashboard
+      </Link>
+    );
+  }
+
   const handleSignIn = async () => {
     setLoading(true);
     try {
-      await signIn("github");
-      // Keep loading state until redirect happens - don't reset it
+      await signIn("github", { callbackUrl });
+      // Keep loading until the redirect happens.
     } catch (error) {
       console.error("Error signing in:", error);
-      setLoading(false); // Only reset on error
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Button isLoading={loading} onClickCapture={handleSignIn} radius="sm" size="lg" disabled={loading} >
-        <Image src="/icons/GithubLogo.svg" alt="Logo" width={24} height={24} />
-        Sign in with GitHub
-      </Button>
-    </>
+    <button type="button" onClick={handleSignIn} disabled={loading} className={cx(base, className)}>
+      {variant === "primary" && <GitHubMark className="h-[18px] w-[18px]" />}
+      {loading ? "Redirecting to GitHub…" : label ?? (variant === "nav" ? "Sign in" : "Sign in with GitHub")}
+    </button>
   );
 }

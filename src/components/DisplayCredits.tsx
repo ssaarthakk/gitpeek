@@ -1,20 +1,22 @@
 'use client';
 import { useSession } from 'next-auth/react';
+import { StatCell, cx } from '@/components/kit';
 
-export default function DisplayCredits() {
+export default function DisplayCredits({ className }: { className?: string }) {
   const { data: session, status } = useSession();
+  const credits = session?.user?.credits ?? 0;
+
+  if (status === 'loading') {
+    return <div className={cx('h-[86px] animate-pulse rounded-2xl bg-surface-2', className)} />;
+  }
 
   return (
-    <div className="bg-white/5 rounded-xl p-6 h-full flex flex-col justify-between">
-      <div>
-        <h2 className="text-lg font-semibold text-white">Your Credits</h2>
-        <p className="text-sm text-white/50 mt-1">Current balance available for use.</p>
-      </div>
-      {status === 'loading' ? (
-        <div className="h-12 w-24 bg-white/10 rounded-md animate-pulse mt-4" />
-      ) : (
-        <p className="text-5xl font-bold text-white mt-4">{session?.user?.credits ?? 0}</p>
-      )}
-    </div>
+    <StatCell
+      className={className}
+      label="Credits"
+      tick={credits > 0 ? 'ink' : 'danger'}
+      value={credits}
+      unit={credits === 1 ? 'link left' : 'links left'}
+    />
   );
 }

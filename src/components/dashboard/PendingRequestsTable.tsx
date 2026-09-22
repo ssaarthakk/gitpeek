@@ -1,101 +1,135 @@
-'use client'
-
+'use client';
 import { useState } from 'react';
-import { Button, Card, CardBody } from "@heroui/react";
-import { approveAccessRequest } from '@/actions/approveRequest';
+import { Button, Chip, Tile } from '@/components/kit';
+import { PendingRequest } from './types';
+import { timeAgo } from './format';
 
-export default function PendingRequestsTable({ requests }: { requests: any[] }) {
-    const [loadingId, setLoadingId] = useState<string | null>(null);
-    const [approvedLinks, setApprovedLinks] = useState<Record<string, string>>({});
+type PendingRequestsTableProps = {
+    requests: PendingRequest[];
+    /** requestId → URL of the fresh link created on approval. */
+    approvedLinks: Record<string, string>;
+    loadingId: string | null;
+    onApprove: (requestId: string, originalLinkId: string) => void;
+    onDismiss: (requestId: string) => void;
+    id?: string;
+};
 
-    const handleApprove = async (requestId: string, originalLinkId: string) => {
-        setLoadingId(requestId);
-        const result = await approveAccessRequest(requestId, originalLinkId);
+/** Readers asking for access to an ended link. Approving creates a new 7-day link, free. */
+export default function PendingRequestsTable({
+    requests,
+    approvedLinks,
+    loadingId,
+    onApprove,
+    onDismiss,
+    id,
+}: PendingRequestsTableProps) {
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const waiting = requests.filter((r) => !approvedLinks[r.id]).length;
 
-        if (result.success && result.newLinkId) {
-            setApprovedLinks(prev => ({
-                ...prev,
-                [requestId]: `${window.location.origin}/view/${result.newLinkId}`
-            }));
+    const copy = async (requestId: string, url: string) => {
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopiedId(requestId);
+            setTimeout(() => setCopiedId((cur) => (cur === requestId ? null : cur)), 1500);
+        } catch (e) {
+            console.error('Clipboard write failed', e);
         }
-        setLoadingId(null);
     };
 
-    if (!requests || requests.length === 0) {
-        return (
-            <Card className="bg-white/5 border border-white/10 shadow-sm w-full">
-                <CardBody className="flex flex-col items-center justify-center py-12 text-center relative overflow-hidden">
-                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 border border-white/10 relative z-10">
-                        <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                    </div>
-                    <h3 className="text-lg font-medium text-white mb-2 relative z-10">No Pending Requests</h3>
-                    <p className="text-white/50 text-sm max-w-sm relative z-10">
-                        When users request access to an expired or exhausted link, their requests will appear here for your review.
-                    </p>
-                </CardBody>
-            </Card>
-        );
-    }
-
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {requests.map((request) => (
-                <Card key={request.id} className="bg-white/5 border border-white/10 shadow-lg relative overflow-hidden">
-                    {/* Decorative blur effect similar to dashboard theme */}
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
+        <Tile
+            id={id}
+            tone="glass"
+            className="min-w-0"
+            title={
+                <span className="flex items-baseline gap-2">
+                    Access requests
+                    <span className="text-[13px] font-normal tabular-nums text-ink-3">
+                        {waiting > 0 ? `${waiting} waiting` : 'none waiting'}
+                    </span>
+                </span>
+            }
+            actions={<span className="hidden text-xs text-ink-3 sm:inline">Approving creates a new 7-day link, free</span>}
+        >
+            {requests.length === 0 ? (
+                <div className="rounded-[18px] bg-white/[.04] px-5 py-12 text-center">
+                    <p className="text-[15px] font-medium text-ink">No one is waiting on you.</p>
+                    <p className="mx-auto mt-1.5 max-w-sm text-[13px] leading-relaxed text-ink-3">
+                        When a reader opens a link that has expired or already been used, they can ask you for access.
+                        Their request shows up here.
+                    </p>
+                </div>
+            ) : (
+                <ul className="flex flex-col gap-2">
+                    {requests.map((request) => {
+                        const approvedUrl = approvedLinks[request.id];
+                        const loading = loadingId === request.id;
+                        const ref = request.shareLink.ref;
+                        return (
+                            <li key={request.id} className="rounded-[18px] bg-white/[.04] p-4">
+                                <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                                    <span
+                                        aria-hidden="true"
+                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-surface text-sm font-semibold text-ink"
+                                    >
+                                        {request.viewerEmail.slice(0, 1).toUpperCase()}
+                                    </span>
+                                    <div className="min-w-0 flex-1 basis-[200px]">
+                                        <div className="truncate text-sm font-medium text-ink" title={request.viewerEmail}>
+                                            {request.viewerEmail}
+                                        </div>
+                                        <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-3">
+                                            <span className="truncate">{request.shareLink.repoFullName}</span>
+                                            {ref && ref !== 'main' && <Chip>{ref}</Chip>}
+                                            <span title={new Date(request.createdAt).toLocaleString()}>· {timeAgo(request.createdAt)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex shrink-0 gap-1.5">
+                                        {approvedUrl ? (
+                                            <Chip tone="up" dot>
+                                                Approved
+                                            </Chip>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => onDismiss(request.id)}
+                                                    disabled={loading}
+                                                    title="Hide this request for now. It isn't declined and will be back after a reload."
+                                                >
+                                                    Dismiss
+                                                </Button>
+                                                <Button size="sm" onClick={() => onApprove(request.id, request.shareLinkId)} disabled={loading}>
+                                                    {loading ? 'Approving…' : 'Approve'}
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
 
-                    <CardBody className="p-5 relative z-10">
-                        <div className="flex justify-between items-start">
-                            <div className="w-full">
-                                <p className="text-sm text-white/50 font-mono mb-1 truncate">
-                                    {request.shareLink.repoFullName}
-                                    {request.shareLink.ref !== 'main' && ` (${request.shareLink.ref})`}
-                                </p>
-                                <h3 className="font-bold text-lg text-white">{request.viewerEmail}</h3>
                                 {request.message && (
-                                    <div className="mt-3 bg-white/5 rounded-lg p-3 border border-white/5 border-l-2 border-l-primary/50">
-                                        <p className="text-sm text-white/70 italic">
-                                            &quot;{request.message}&quot;
-                                        </p>
+                                    <p className="mt-3 rounded-xl bg-white/[.04] px-3.5 py-2.5 text-[13px] leading-relaxed text-ink-2" title={request.message}>
+                                        &ldquo;{request.message}&rdquo;
+                                    </p>
+                                )}
+
+                                {approvedUrl && (
+                                    <div className="mt-3 flex items-center gap-3 rounded-xl bg-up-soft px-3.5 py-2">
+                                        <span className="shrink-0 text-[13px] font-medium text-up">New 7-day link</span>
+                                        <span className="min-w-0 flex-1 select-all truncate text-xs text-ink">{approvedUrl}</span>
+                                        <Button variant="secondary" size="sm" onClick={() => copy(request.id, approvedUrl)}>
+                                            {copiedId === request.id ? 'Copied' : 'Copy'}
+                                        </Button>
                                     </div>
                                 )}
-                            </div>
-                        </div>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
 
-                        <div className="mt-5 pt-4 border-t border-white/10">
-                            {approvedLinks[request.id] ? (
-                                <div className="bg-success/10 p-3 rounded-lg border border-success/20">
-                                    <p className="text-xs text-success/90 font-bold mb-1">Access Granted! Share this new link:</p>
-                                    <code className="text-xs text-success-500 break-all select-all font-mono">
-                                        {approvedLinks[request.id]}
-                                    </code>
-                                </div>
-                            ) : (
-                                <div className="flex gap-3">
-                                    <Button
-                                        size="sm"
-                                        color="primary"
-                                        className="font-semibold shadow-lg shadow-primary/20"
-                                        isLoading={loadingId === request.id}
-                                        onClick={() => handleApprove(request.id, request.shareLinkId)}
-                                    >
-                                        Approve & Generate Link
-                                    </Button>
-                                    <Button 
-                                        size="sm" 
-                                        variant="flat" 
-                                        className="bg-white/10 text-white hover:bg-white/20 transition-colors"
-                                    >
-                                        Dismiss
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </CardBody>
-                </Card>
-            ))}
-        </div>
+            <p className="mt-4 text-xs text-ink-4">Readers are not told when you dismiss a request.</p>
+        </Tile>
     );
 }

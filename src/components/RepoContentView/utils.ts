@@ -57,3 +57,19 @@ export function isImage(filePath: string) {
 export function isMarkdown(filePath: string) {
     return /(README|readme)\.(md|markdown)$/.test(filePath) || /\.(md|markdown)$/.test(filePath);
 }
+
+export function formatBytes(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes < 0) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)} KB`;
+    const mb = kb / 1024;
+    return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
+}
+
+/** Human label for the file kind shown next to the path, e.g. "typescript", "markdown", "image". */
+export function fileKindLabel(filePath: string): string {
+    if (isImage(filePath)) return 'image';
+    if (isMarkdown(filePath)) return 'markdown';
+    return detectLanguage(filePath) ?? 'text';
+}
