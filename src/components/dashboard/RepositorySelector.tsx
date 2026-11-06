@@ -29,7 +29,7 @@ export default function RepositorySelector({
     );
 
     return (
-        <div className="rounded-[18px] bg-surface-2 p-1.5">
+        <div className="flex flex-col rounded-[18px] bg-surface-2 p-1.5 lg:min-h-0 lg:flex-1">
             <div className="mb-1.5 flex h-10 items-center gap-2.5 rounded-full border border-line bg-surface px-4 focus-within:border-accent">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="shrink-0 text-ink-3" aria-hidden="true">
                     <circle cx="7" cy="7" r="4.5" />
@@ -51,7 +51,7 @@ export default function RepositorySelector({
                 )}
             </div>
 
-            <div role="listbox" aria-label="Repository" className="custom-scrollbar max-h-[220px] overflow-y-auto">
+            <div role="listbox" aria-label="Repository" className="custom-scrollbar max-h-[260px] overflow-y-auto lg:max-h-none lg:min-h-[240px] lg:flex-1 lg:[contain:size]">
                 {reposLoading ? (
                     <div className="flex flex-col gap-1 p-1">
                         {[...Array(4)].map((_, i) => (
@@ -84,7 +84,7 @@ export default function RepositorySelector({
                                 title={repo.description || undefined}
                                 onClick={() => setSelectedRepo(repo.full_name)}
                                 className={cx(
-                                    'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
+                                    'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition duration-150 active:scale-[0.99]',
                                     on ? 'bg-ink text-bg' : 'hover:bg-hover',
                                 )}
                             >

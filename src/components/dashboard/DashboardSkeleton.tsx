@@ -27,16 +27,25 @@ export function NavbarSkeleton() {
 /** First-load layout of the New link form. */
 function NewLinkSkeleton() {
     return (
-        <TileBone className="mx-auto w-full max-w-2xl">
-            <Bone className="mb-6 h-5 w-48 rounded-full" />
-            <Bone className="mb-6 h-[260px] rounded-[18px]" />
-            <div className="mb-6 flex gap-1.5">
-                {[56, 80, 64].map((w) => (
-                    <Bone key={w} className="h-8 rounded-full" style={{ width: w }} />
-                ))}
+        <div className="flex flex-col gap-4">
+            <Bone className="h-8 w-64 rounded-full" />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <TileBone>
+                    <Bone className="mb-6 h-5 w-40 rounded-full" />
+                    <Bone className="h-[260px] rounded-[18px] lg:h-[460px]" />
+                </TileBone>
+                <TileBone>
+                    <Bone className="mb-6 h-5 w-40 rounded-full" />
+                    <div className="mb-6 flex gap-1.5">
+                        {[56, 80, 64].map((w) => (
+                            <Bone key={w} className="h-8 rounded-full" style={{ width: w }} />
+                        ))}
+                    </div>
+                    <Bone className="mb-6 h-[220px] rounded-[18px]" />
+                    <Bone className="h-12 rounded-full" />
+                </TileBone>
             </div>
-            <Bone className="h-12 rounded-full" />
-        </TileBone>
+        </div>
     );
 }
 

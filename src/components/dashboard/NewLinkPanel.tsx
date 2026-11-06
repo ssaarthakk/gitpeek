@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Endpoints } from '@octokit/types';
 import { GitHubMark } from '@/components/site/icons';
-import { Button, cx, inputClass } from '@/components/kit';
+import { Button, Tile, cx, inputClass } from '@/components/kit';
 import RepositorySelector from './RepositorySelector';
 import { ExpiryOption } from './types';
 import { label } from './ui';
@@ -53,7 +53,7 @@ function Pill({ on, onClick, children }: { on: boolean; onClick: () => void; chi
             aria-pressed={on}
             onClick={onClick}
             className={cx(
-                'h-8 max-w-full truncate rounded-full px-3.5 text-[13px] font-medium transition-colors',
+                'h-8 max-w-full truncate rounded-full px-3.5 text-[13px] font-medium transition duration-150 active:scale-95',
                 on ? 'bg-ink text-bg' : 'border border-line-strong text-ink-2 hover:bg-hover hover:text-ink',
             )}
         >
@@ -79,7 +79,7 @@ function Toggle({
             role="switch"
             aria-checked={on}
             onClick={() => onChange(!on)}
-            className="flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left transition-colors hover:bg-hover"
+            className="flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3 text-left transition duration-150 hover:bg-hover active:scale-[0.99]"
         >
             <span className="min-w-0">
                 <span className={cx('block text-sm font-medium', on ? 'text-ink' : 'text-ink-2')}>{title}</span>
@@ -87,13 +87,13 @@ function Toggle({
             </span>
             <span
                 className={cx(
-                    'relative block h-6 w-10 shrink-0 rounded-full transition-colors',
+                    'relative block h-6 w-10 shrink-0 rounded-full transition-colors duration-200',
                     on ? 'bg-up' : 'bg-line-strong',
                 )}
             >
                 <span
                     className={cx(
-                        'absolute top-1 h-4 w-4 rounded-full bg-white transition-[left] duration-150',
+                        'absolute top-1 h-4 w-4 rounded-full bg-white transition-[left] duration-200 ease-out',
                         on ? 'left-5' : 'left-1',
                     )}
                 />
@@ -104,7 +104,7 @@ function Toggle({
 
 /**
  * "New link" form: repository, branch, expiry and restrictions, then create.
- * Rendered inline as the dashboard home, since creating links is the main job.
+ * The dashboard home: repository on the left, link settings on the right; stacks on mobile.
  */
 export default function NewLinkPanel({
     credits,
@@ -214,34 +214,39 @@ export default function NewLinkPanel({
     }
 
     if (isLoadingInstall) {
-        return <div className="py-16 text-center text-sm text-ink-3">Checking your GitHub App installation…</div>;
+        return (
+            <Tile>
+                <div className="py-16 text-center text-sm text-ink-3">Checking your GitHub App installation…</div>
+            </Tile>
+        );
     }
 
     if (!isInstalled) {
         return (
-            <div className="flex flex-col items-start gap-5 py-2">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-2">
-                    <GitHubMark className="h-6 w-6 text-ink" />
-                </span>
-                <div>
-                    <h3 className="text-lg font-semibold text-ink">Install the GitHub App first</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-ink-2">
-                        GitPeek reads repositories through its GitHub App. Install it on your account and choose which
-                        repositories it can see; you can change that later.
-                    </p>
+            <Tile>
+                <div className="mx-auto flex max-w-md flex-col items-start gap-5 py-6">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-2">
+                        <GitHubMark className="h-6 w-6 text-ink" />
+                    </span>
+                    <div>
+                        <h3 className="text-lg font-semibold text-ink">Install the GitHub App first</h3>
+                        <p className="mt-1.5 text-sm leading-relaxed text-ink-2">
+                            GitPeek reads repositories through its GitHub App. Install it on your account and choose which
+                            repositories it can see; you can change that later.
+                        </p>
+                    </div>
+                    <Button onClick={handleInstallClick} disabled={installLoading} size="lg" className="w-full">
+                        <GitHubMark className="h-4 w-4" />
+                        {installLoading ? 'Waiting for GitHub…' : 'Install GitHub App'}
+                    </Button>
                 </div>
-                <Button onClick={handleInstallClick} disabled={installLoading} size="lg" className="w-full">
-                    <GitHubMark className="h-4 w-4" />
-                    {installLoading ? 'Waiting for GitHub…' : 'Install GitHub App'}
-                </Button>
-            </div>
+            </Tile>
         );
     }
 
     return (
-        <div className="flex flex-col gap-6 pb-2">
-            <div>
-                <div className={cx(label, 'mb-2.5')}>Repository</div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <Tile title="1. Pick a repository" className="flex flex-col" bodyClassName="flex min-h-0 flex-1 flex-col">
                 <RepositorySelector
                     repos={repos}
                     reposLoading={reposLoading}
@@ -250,123 +255,126 @@ export default function NewLinkPanel({
                     selectedRepo={selectedRepo}
                     setSelectedRepo={setSelectedRepo}
                 />
-            </div>
+            </Tile>
 
-            <div>
-                <div className={cx(label, 'mb-2.5')}>Branch</div>
-                {!selectedRepo ? (
-                    <p className="text-[13px] text-ink-4">Pick a repository to see its branches.</p>
-                ) : loadingBranches ? (
-                    <div className="flex gap-1.5">
-                        {[56, 80, 64].map((w) => (
-                            <div key={w} style={{ width: w }} className="h-8 animate-pulse rounded-full bg-surface-2" />
-                        ))}
-                    </div>
-                ) : branches.length === 0 ? (
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex h-8 items-center rounded-full bg-ink px-3.5 text-[13px] font-medium text-bg">
-                            {selectedBranch}
-                        </span>
-                        {branchesFailed && (
-                            <span className="text-xs text-ink-4">
-                                Couldn&apos;t load branches; {selectedBranch} will be shared
+            <Tile title="2. Set up the link" bodyClassName="flex flex-col gap-6">
+
+                <div>
+                    <div className={cx(label, 'mb-2.5')}>Branch</div>
+                    {!selectedRepo ? (
+                        <p className="text-[13px] text-ink-4">Pick a repository to see its branches.</p>
+                    ) : loadingBranches ? (
+                        <div className="flex gap-1.5">
+                            {[56, 80, 64].map((w) => (
+                                <div key={w} style={{ width: w }} className="h-8 animate-pulse rounded-full bg-surface-2" />
+                            ))}
+                        </div>
+                    ) : branches.length === 0 ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex h-8 items-center rounded-full bg-ink px-3.5 text-[13px] font-medium text-bg">
+                                {selectedBranch}
                             </span>
-                        )}
-                    </div>
-                ) : branches.length <= MAX_BRANCH_PILLS ? (
+                            {branchesFailed && (
+                                <span className="text-xs text-ink-4">
+                                    Couldn&apos;t load branches; {selectedBranch} will be shared
+                                </span>
+                            )}
+                        </div>
+                    ) : branches.length <= MAX_BRANCH_PILLS ? (
+                        <div className="flex flex-wrap gap-1.5 animate-in fade-in duration-300">
+                            {branches.map((b) => (
+                                <Pill key={b} on={b === selectedBranch} onClick={() => setSelectedBranch(b)}>
+                                    {b}
+                                </Pill>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="relative">
+                            <select
+                                aria-label="Branch"
+                                value={selectedBranch}
+                                onChange={(e) => setSelectedBranch(e.target.value)}
+                                className={cx(inputClass, 'appearance-none pr-10')}
+                            >
+                                {branches.map((b) => (
+                                    <option key={b} value={b}>
+                                        {b}
+                                    </option>
+                                ))}
+                            </select>
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden="true">
+                                <path d="M4 6l4 4 4-4" />
+                            </svg>
+                        </div>
+                    )}
+                </div>
+
+                <div>
+                    <div className={cx(label, 'mb-2.5')}>Expires</div>
                     <div className="flex flex-wrap gap-1.5">
-                        {branches.map((b) => (
-                            <Pill key={b} on={b === selectedBranch} onClick={() => setSelectedBranch(b)}>
-                                {b}
+                        {expiries.map((e) => (
+                            <Pill key={e.key} on={selectedExpiry === e.key} onClick={() => setSelectedExpiry(e.key)}>
+                                {e.label}
                             </Pill>
                         ))}
                     </div>
-                ) : (
-                    <div className="relative">
-                        <select
-                            aria-label="Branch"
-                            value={selectedBranch}
-                            onChange={(e) => setSelectedBranch(e.target.value)}
-                            className={cx(inputClass, 'appearance-none pr-10')}
-                        >
-                            {branches.map((b) => (
-                                <option key={b} value={b}>
-                                    {b}
-                                </option>
-                            ))}
-                        </select>
-                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-ink-3" aria-hidden="true">
-                            <path d="M4 6l4 4 4-4" />
-                        </svg>
+                    <p className="mt-2.5 text-xs text-ink-3">
+                        {selectedExpiry === 'never'
+                            ? 'Stays open until you revoke it.'
+                            : `Closes ${expiries.find((e) => e.key === selectedExpiry)?.label} after you create it.`}
+                    </p>
+                </div>
+
+                <div>
+                    <div className={cx(label, 'mb-2')}>Restrictions</div>
+                    <div className="rounded-[18px] bg-surface-2 p-1">
+                        <Toggle
+                            on={passwordProtected}
+                            onChange={setPasswordProtected}
+                            title="Require a password"
+                            hint="Readers enter it before they see the repository"
+                        />
+                        {passwordProtected && (
+                            <div className="px-3 pb-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <input
+                                    type="password"
+                                    aria-label="Password"
+                                    placeholder="Password readers must enter"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    autoFocus
+                                    className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-4 focus:border-accent"
+                                />
+                            </div>
+                        )}
+                        <Toggle
+                            on={isOneTime}
+                            onChange={setIsOneTime}
+                            title="Expire after first open"
+                            hint="The link stops working once it has been opened"
+                        />
+                        <Toggle
+                            on={blockCopying}
+                            onChange={setBlockCopying}
+                            title="Block copy and download"
+                            hint="No text selection, no ZIP download"
+                        />
+                        <Toggle
+                            on={requireEmail}
+                            onChange={setRequireEmail}
+                            title="Require a verified email"
+                            hint="Readers verify an address first, so you can see who opened it"
+                        />
                     </div>
-                )}
-            </div>
-
-            <div>
-                <div className={cx(label, 'mb-2.5')}>Expires</div>
-                <div className="flex flex-wrap gap-1.5">
-                    {expiries.map((e) => (
-                        <Pill key={e.key} on={selectedExpiry === e.key} onClick={() => setSelectedExpiry(e.key)}>
-                            {e.label}
-                        </Pill>
-                    ))}
                 </div>
-                <p className="mt-2.5 text-xs text-ink-3">
-                    {selectedExpiry === 'never'
-                        ? 'Stays open until you revoke it.'
-                        : `Closes ${expiries.find((e) => e.key === selectedExpiry)?.label} after you create it.`}
-                </p>
-            </div>
 
-            <div>
-                <div className={cx(label, 'mb-2')}>Restrictions</div>
-                <div className="rounded-[18px] bg-surface-2 p-1">
-                    <Toggle
-                        on={passwordProtected}
-                        onChange={setPasswordProtected}
-                        title="Require a password"
-                        hint="Readers enter it before they see the repository"
-                    />
-                    {passwordProtected && (
-                        <div className="px-3 pb-2">
-                            <input
-                                type="password"
-                                aria-label="Password"
-                                placeholder="Password readers must enter"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                autoFocus
-                                className="w-full rounded-xl border border-line-strong bg-surface px-4 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-4 focus:border-accent"
-                            />
-                        </div>
-                    )}
-                    <Toggle
-                        on={isOneTime}
-                        onChange={setIsOneTime}
-                        title="Expire after first open"
-                        hint="The link stops working once it has been opened"
-                    />
-                    <Toggle
-                        on={blockCopying}
-                        onChange={setBlockCopying}
-                        title="Block copy and download"
-                        hint="No text selection, no ZIP download"
-                    />
-                    <Toggle
-                        on={requireEmail}
-                        onChange={setRequireEmail}
-                        title="Require a verified email"
-                        hint="Readers verify an address first, so you can see who opened it"
-                    />
+                <div className="flex flex-col gap-2.5">
+                    <Button onClick={handleCreate} disabled={!canCreate} size="lg" className="w-full">
+                        {isCreating ? 'Creating…' : outOfCredits ? 'Out of credits' : 'Create link'}
+                    </Button>
+                    <div className="text-center text-xs text-ink-3">{hint}</div>
                 </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-                <Button onClick={handleCreate} disabled={!canCreate} size="lg" className="w-full">
-                    {isCreating ? 'Creating…' : outOfCredits ? 'Out of credits' : 'Create link'}
-                </Button>
-                <div className="text-center text-xs text-ink-3">{hint}</div>
-            </div>
+            </Tile>
         </div>
     );
 }

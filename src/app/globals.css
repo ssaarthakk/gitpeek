@@ -73,6 +73,19 @@
   ::selection {
     background: var(--color-accent-soft);
   }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  /* Tailwind v4 preflight resets buttons to cursor: default; restore the pointer. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @utility hatch {
@@ -114,10 +127,14 @@
 .markdown-body a { color: var(--color-accent); text-decoration: none; }
 .markdown-body a:hover { text-decoration: underline; }
 
-/* Thin neutral scrollbar for panes */
+/* Thin neutral scrollbar for panes. Standard props cover Firefox and Chrome 121+ (which then ignores
+   the ::-webkit rules); the ::-webkit rules are for Safari. Transparent border + padding-box clip
+   keeps the thumb inset on any background. */
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
+.custom-scrollbar:hover { scrollbar-color: var(--color-ink-4) transparent; }
 .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-line-strong); border-radius: 9999px; border: 3px solid var(--color-surface); }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-ink-4); }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-line-strong) padding-box; border-radius: 9999px; border: 3px solid transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-ink-4) padding-box; }
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

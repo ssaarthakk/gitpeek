@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { useDisclosure } from '@heroui/react';
-import { Tile } from '@/components/kit';
 import { useToast } from '@/hooks/useToast';
 import useRepos from '@/hooks/useRepo';
 import useLinkStats from '@/hooks/useLinkStats';
@@ -243,17 +242,15 @@ export default function DashboardContent({
                 onNewLink={() => openNewLink()}
             />
 
-            <main className="flex flex-col gap-4 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
+            <main key={tab} className="flex flex-col gap-4 px-4 pb-10 pt-5 animate-in fade-in slide-in-from-bottom-2 duration-300 sm:px-6 lg:px-8 lg:pt-6">
                 {tab === 'overview' && (
-                    <Tile
-                        className="mx-auto w-full max-w-2xl"
-                        title="Share a private repo"
-                        actions={
+                    <section className="flex flex-col gap-4">
+                        <div className="flex flex-wrap items-end justify-between gap-2 px-1">
+                            <h1 className="text-2xl font-semibold text-ink">Share a private repo</h1>
                             <span className="text-[13px] text-ink-3">
                                 {credits} {credits === 1 ? 'credit' : 'credits'} left · one credit per link
                             </span>
-                        }
-                    >
+                        </div>
                         <NewLinkPanel
                             credits={credits}
                             repos={repos}
@@ -270,7 +267,7 @@ export default function DashboardContent({
                             isLoadingInstall={isLoadingInstall}
                             openInstallationWindow={openInstallationWindow}
                         />
-                    </Tile>
+                    </section>
                 )}
 
                 {tab === 'insights' && (

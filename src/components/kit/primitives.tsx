@@ -16,7 +16,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'acce
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const buttonBase =
-    'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50';
+    'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold transition duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100';
 
 const buttonVariants: Record<ButtonVariant, string> = {
     primary: 'bg-ink text-bg hover:bg-white',
@@ -47,7 +47,7 @@ export function Button({ variant = 'primary', size = 'md', className, type = 'bu
 
 /** 40px round outlined button, like the search / bell / refresh buttons in the reference. */
 const iconButtonBase =
-    'relative inline-flex shrink-0 items-center justify-center rounded-full border border-line-strong text-ink-2 transition-colors hover:bg-hover hover:text-ink disabled:opacity-50';
+    'relative inline-flex shrink-0 items-center justify-center rounded-full border border-line-strong text-ink-2 transition duration-150 hover:bg-hover hover:text-ink active:scale-90 disabled:opacity-50 disabled:active:scale-100';
 
 export const iconButtonClass = cx(iconButtonBase, 'h-10 w-10');
 
@@ -193,72 +193,7 @@ export function DeltaPill({ value, onAccent = false, className }: { value: numbe
     );
 }
 
-/* ─── Pills ───────────────────────────────────────────────────────────────── */
-
-export type PillOption<T extends string> = { value: T; label: React.ReactNode; badge?: number };
-
-/** Segmented pill control — white active pill inside a dark rounded track. Used for nav and filters. */
-export function PillTabs<T extends string>({
-    options,
-    value,
-    onChange,
-    size = 'md',
-    className,
-    ariaLabel,
-    tone = 'default',
-}: {
-    options: PillOption<T>[];
-    value: T;
-    onChange: (v: T) => void;
-    size?: 'sm' | 'md';
-    className?: string;
-    ariaLabel?: string;
-    /** `onAccent` for use on the orange tile (transparent track, white text). */
-    tone?: 'default' | 'onAccent';
-}) {
-    return (
-        <div
-            role="tablist"
-            aria-label={ariaLabel}
-            className={cx(
-                'no-scrollbar inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full p-1',
-                tone === 'default' ? 'border border-line bg-surface' : 'bg-transparent',
-                className,
-            )}
-        >
-            {options.map((o) => {
-                const on = o.value === value;
-                return (
-                    <button
-                        key={o.value}
-                        type="button"
-                        role="tab"
-                        aria-selected={on}
-                        onClick={() => onChange(o.value)}
-                        className={cx(
-                            'inline-flex shrink-0 items-center gap-1.5 rounded-full font-medium transition-colors',
-                            size === 'sm' ? 'h-7 px-3 text-xs' : 'h-9 px-4 text-[13.5px]',
-                            tone === 'default'
-                                ? on
-                                    ? 'bg-ink text-bg'
-                                    : 'text-ink-2 hover:text-ink'
-                                : on
-                                  ? 'bg-white/20 text-white'
-                                  : 'text-white/70 hover:text-white',
-                        )}
-                    >
-                        {o.label}
-                        {!!o.badge && (
-                            <span className={cx('min-w-[18px] rounded-full px-1.5 text-[11px] leading-[18px]', on ? 'bg-accent text-white' : 'bg-accent text-white')}>
-                                {o.badge}
-                            </span>
-                        )}
-                    </button>
-                );
-            })}
-        </div>
-    );
-}
+/* ─── Chips ───────────────────────────────────────────────────────────────── */
 
 export type ChipTone = 'default' | 'up' | 'sun' | 'accent' | 'danger';
 
