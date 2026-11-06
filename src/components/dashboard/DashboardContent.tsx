@@ -2,7 +2,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import { Drawer, DrawerBody, DrawerContent, DrawerHeader, useDisclosure } from '@heroui/react';
+import { useDisclosure } from '@heroui/react';
+import { Tile } from '@/components/kit';
 import { useToast } from '@/hooks/useToast';
 import useRepos from '@/hooks/useRepo';
 import useLinkStats from '@/hooks/useLinkStats';
@@ -20,7 +21,6 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import { getPendingRequests } from '@/actions/getPendingRequests';
 import { approveAccessRequest } from '@/actions/approveRequest';
 import { DashTab, ExpiryOption, PendingRequest, ShareLink, linkBucket } from './types';
-import { sheetClassNames } from './ui';
 import useNow from './useNow';
 
 type DashboardContentProps = {
@@ -30,11 +30,10 @@ type DashboardContentProps = {
     openInstallationWindow: () => void;
 };
 
-/** URL hash ↔ section. #new opens the New link sheet on top of the overview. */
-function readHash(): { tab: DashTab; openNew: boolean } {
+/** URL hash ↔ section. Anything else (including the old #new) lands on the New link form. */
+function readHash(): DashTab {
     const h = typeof window === 'undefined' ? '' : window.location.hash.replace('#', '');
-    if (h === 'links' || h === 'requests') return { tab: h, openNew: false };
-    return { tab: 'overview', openNew: h === 'new' };
+    return h === 'links' || h === 'requests' || h === 'insights' ? h : 'overview';
 }
 
 export default function DashboardContent({
@@ -69,19 +68,10 @@ export default function DashboardContent({
     const [approvingId, setApprovingId] = useState<string | null>(null);
 
     const [tab, setTabState] = useState<DashTab>('overview');
-    const sheet = useDisclosure();
-    const openSheet = sheet.onOpen;
 
-    // Deep links: /dashboard#links, #requests, #new. Back/forward switch sections too.
+    // Deep links: /dashboard#links, #requests, #insights. Back/forward switch sections too.
     useEffect(() => {
-        const sync = () => {
-            const { tab: t, openNew } = readHash();
-            setTabState(t);
-            if (openNew) {
-                openSheet();
-                history.replaceState(null, '', window.location.pathname + window.location.search);
-            }
-        };
+        const sync = () => setTabState(readHash());
         sync();
         window.addEventListener('hashchange', sync);
         window.addEventListener('popstate', sync);
@@ -89,12 +79,12 @@ export default function DashboardContent({
             window.removeEventListener('hashchange', sync);
             window.removeEventListener('popstate', sync);
         };
-    }, [openSheet]);
+    }, []);
 
     const setTab = useCallback((t: DashTab) => {
         setTabState(t);
         const url = t === 'overview' ? window.location.pathname + window.location.search : `#${t}`;
-        if (readHash().tab !== t) history.pushState(null, '', url);
+        if (readHash() !== t) history.pushState(null, '', url);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
@@ -138,9 +128,9 @@ export default function DashboardContent({
     const openNewLink = useCallback(
         (repoFullName?: string) => {
             if (repoFullName) setSelectedRepo(repoFullName);
-            openSheet();
+            setTab('overview');
         },
-        [openSheet],
+        [setTab],
     );
 
     const createShareLink = async (options: NewLinkOptions): Promise<boolean> => {
@@ -174,7 +164,6 @@ export default function DashboardContent({
                 /* the modal still offers a Copy button */
             }
 
-            sheet.onClose();
             setCopiedOnCreate(copied);
             setCreatedLink(newLink);
             setSelectedExpiry('never'); // Reset to default
@@ -256,6 +245,35 @@ export default function DashboardContent({
 
             <main className="flex flex-col gap-4 px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
                 {tab === 'overview' && (
+                    <Tile
+                        className="mx-auto w-full max-w-2xl"
+                        title="Share a private repo"
+                        actions={
+                            <span className="text-[13px] text-ink-3">
+                                {credits} {credits === 1 ? 'credit' : 'credits'} left · one credit per link
+                            </span>
+                        }
+                    >
+                        <NewLinkPanel
+                            credits={credits}
+                            repos={repos}
+                            reposLoading={reposLoading}
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            selectedRepo={selectedRepo}
+                            setSelectedRepo={setSelectedRepo}
+                            selectedExpiry={selectedExpiry}
+                            setSelectedExpiry={setSelectedExpiry}
+                            onCreate={createShareLink}
+                            isCreating={isCreatingShare}
+                            isInstalled={isInstalled}
+                            isLoadingInstall={isLoadingInstall}
+                            openInstallationWindow={openInstallationWindow}
+                        />
+                    </Tile>
+                )}
+
+                {tab === 'insights' && (
                     <>
                         <PerformanceTile
                             stats={linkStats.stats}
@@ -322,46 +340,6 @@ export default function DashboardContent({
                     />
                 )}
             </main>
-
-            <Drawer
-                isOpen={sheet.isOpen}
-                onOpenChange={sheet.onOpenChange}
-                placement="right"
-                size="md"
-                scrollBehavior="inside"
-                classNames={sheetClassNames}
-            >
-                <DrawerContent>
-                    {() => (
-                        <>
-                            <DrawerHeader className="flex flex-col gap-1">
-                                <span className="text-xl font-semibold text-ink">New link</span>
-                                <span className="text-[13px] font-normal text-ink-3">
-                                    {credits} {credits === 1 ? 'credit' : 'credits'} left · one credit per link
-                                </span>
-                            </DrawerHeader>
-                            <DrawerBody>
-                                <NewLinkPanel
-                                    credits={credits}
-                                    repos={repos}
-                                    reposLoading={reposLoading}
-                                    searchQuery={searchQuery}
-                                    setSearchQuery={setSearchQuery}
-                                    selectedRepo={selectedRepo}
-                                    setSelectedRepo={setSelectedRepo}
-                                    selectedExpiry={selectedExpiry}
-                                    setSelectedExpiry={setSelectedExpiry}
-                                    onCreate={createShareLink}
-                                    isCreating={isCreatingShare}
-                                    isInstalled={isInstalled}
-                                    isLoadingInstall={isLoadingInstall}
-                                    openInstallationWindow={openInstallationWindow}
-                                />
-                            </DrawerBody>
-                        </>
-                    )}
-                </DrawerContent>
-            </Drawer>
 
             <LinkCreatedModal link={createdLink} copiedOnCreate={copiedOnCreate} onClose={() => setCreatedLink(null)} />
 

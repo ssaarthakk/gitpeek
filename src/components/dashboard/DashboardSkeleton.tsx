@@ -1,8 +1,8 @@
 import { cx } from '@/components/kit';
 
 /** A pulsing placeholder block on surface-2. */
-export function Bone({ className }: { className?: string }) {
-    return <div className={cx('animate-pulse bg-surface-2', className)} />;
+export function Bone({ className, style }: { className?: string; style?: React.CSSProperties }) {
+    return <div style={style} className={cx('animate-pulse bg-surface-2', className)} />;
 }
 
 function TileBone({ className, children }: { className?: string; children?: React.ReactNode }) {
@@ -24,43 +24,19 @@ export function NavbarSkeleton() {
     );
 }
 
-/** First-load layout of the overview: performance tile, repo strip, three tiles. */
-export function OverviewSkeleton() {
+/** First-load layout of the New link form. */
+function NewLinkSkeleton() {
     return (
-        <div className="flex flex-col gap-4">
-            <TileBone>
-                <div className="mb-5 flex items-center justify-between">
-                    <Bone className="h-5 w-40 rounded-full" />
-                    <Bone className="h-10 w-10 rounded-full" />
-                </div>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)]">
-                    <div className="flex flex-col gap-5">
-                        <Bone className="mt-2 h-10 w-40 rounded-full" />
-                        <div className="grid grid-cols-2 gap-3">
-                            {[0, 1, 2, 3].map((i) => (
-                                <Bone key={i} className="h-[86px] rounded-2xl" />
-                            ))}
-                        </div>
-                    </div>
-                    <Bone className="h-[300px] rounded-[22px]" />
-                </div>
-            </TileBone>
-            <TileBone className="py-3 sm:py-3">
-                <div className="flex gap-3 overflow-hidden">
-                    {[0, 1, 2, 3].map((i) => (
-                        <Bone key={i} className="h-[68px] w-[240px] shrink-0 rounded-2xl" />
-                    ))}
-                </div>
-            </TileBone>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {[0, 1, 2].map((i) => (
-                    <TileBone key={i} className={i === 0 ? 'md:col-span-2 xl:col-span-1' : undefined}>
-                        <Bone className="mb-6 h-5 w-32 rounded-full" />
-                        <Bone className="h-[160px] rounded-2xl" />
-                    </TileBone>
+        <TileBone className="mx-auto w-full max-w-2xl">
+            <Bone className="mb-6 h-5 w-48 rounded-full" />
+            <Bone className="mb-6 h-[260px] rounded-[18px]" />
+            <div className="mb-6 flex gap-1.5">
+                {[56, 80, 64].map((w) => (
+                    <Bone key={w} className="h-8 rounded-full" style={{ width: w }} />
                 ))}
             </div>
-        </div>
+            <Bone className="h-12 rounded-full" />
+        </TileBone>
     );
 }
 
@@ -70,7 +46,7 @@ export default function DashboardSkeleton() {
         <div className="min-h-screen bg-bg text-ink">
             <NavbarSkeleton />
             <main className="px-4 pb-10 pt-5 sm:px-6 lg:px-8 lg:pt-6">
-                <OverviewSkeleton />
+                <NewLinkSkeleton />
             </main>
         </div>
     );

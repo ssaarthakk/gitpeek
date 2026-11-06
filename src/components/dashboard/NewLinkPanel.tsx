@@ -104,7 +104,7 @@ function Toggle({
 
 /**
  * "New link" form: repository, branch, expiry and restrictions, then create.
- * Rendered inside the right-hand sheet on the dashboard; same fields and API payload as before.
+ * Rendered inline as the dashboard home, since creating links is the main job.
  */
 export default function NewLinkPanel({
     credits,

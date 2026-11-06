@@ -37,6 +37,7 @@ export default function RepositorySelector({
                 </svg>
                 <input
                     type="text"
+                    autoFocus
                     placeholder="Filter repositories"
                     aria-label="Filter repositories"
                     value={searchQuery}

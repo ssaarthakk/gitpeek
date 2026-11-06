@@ -17,7 +17,7 @@ type DashboardNavbarProps = {
     pendingCount?: number;
     /** On /dashboard the first three tabs switch in place; elsewhere they navigate. */
     onNavigate?: (tab: DashTab) => void;
-    /** Opens the New link sheet; elsewhere "New link" goes to /dashboard#new. */
+    /** Jumps to the New link form; elsewhere "New link" goes to /dashboard. */
     onNewLink?: () => void;
 };
 
@@ -25,6 +25,7 @@ const hrefFor: Record<NavKey, string> = {
     overview: '/dashboard',
     links: '/dashboard#links',
     requests: '/dashboard#requests',
+    insights: '/dashboard#insights',
     billing: '/dashboard/billing',
 };
 
@@ -69,9 +70,10 @@ export default function DashboardNavbar({ session, active, pendingCount = 0, onN
                         onChange={go}
                         className="h-12 px-1.5"
                         options={[
-                            { value: 'overview', label: 'Overview' },
+                            { value: 'overview', label: 'New link' },
                             { value: 'links', label: 'Links' },
                             { value: 'requests', label: 'Requests', badge: pendingCount },
+                            { value: 'insights', label: 'Insights' },
                             { value: 'billing', label: 'Billing' },
                         ]}
                     />
@@ -157,7 +159,7 @@ export default function DashboardNavbar({ session, active, pendingCount = 0, onN
                     </Dropdown>
 
                     <Button
-                        onClick={() => (onNewLink ? onNewLink() : router.push('/dashboard#new'))}
+                        onClick={() => (onNewLink ? onNewLink() : router.push('/dashboard'))}
                         aria-label="New link"
                         className="px-4 sm:px-5"
                     >

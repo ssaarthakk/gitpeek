@@ -72,4 +72,4 @@ export function linkBucket(
 }
 
 /** Sections of the signed-in dashboard; mirrored in the URL hash (#links, #requests). */
-export type DashTab = 'overview' | 'links' | 'requests';
+export type DashTab = 'overview' | 'links' | 'requests' | 'insights';
