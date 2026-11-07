@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Provider from "@/components/Provider";
 import { ToastProvider } from "@/hooks/useToast";
@@ -7,9 +7,10 @@ import LoadingBar from "@/components/LoadingBar";
 import { Suspense } from "react";
 import { SignInLoadingProvider } from "@/components/landing/SignInLoadingContext";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// Self-hosted so builds don't depend on Google Fonts being reachable and well-formed.
+const manrope = localFont({
+  src: "./fonts/Manrope-Variable-latin.woff2",
+  weight: "400 700",
   variable: "--font-sans-face",
   display: "swap",
 });
