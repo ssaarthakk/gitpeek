@@ -97,7 +97,7 @@ export default function TermsPage() {
     <LegalDoc
       doc="terms"
       title="Terms of Service"
-      updated="[DATE]"
+      updated="September 22, 2026"
       intro={
         <p>
           Welcome to Git Peek. By accessing or using our website and services, you agree to be bound by these Terms of

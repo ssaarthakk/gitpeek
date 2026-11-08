@@ -350,8 +350,11 @@ export default async function HomePage() {
         <Section>
           <Tile tone="inset">
             <p className={`${body} max-w-[70ch]`}>
-              GitPeek is built by [YOUR NAME]. [Why you made it, in one or two sentences.] If something breaks or you need
-              a feature, contact [YOUR CONTACT].
+              GitPeek is built by Sarthak Kumar. If something breaks or you want a feature, message me on X at{' '}
+              <a className="text-accent hover:underline" href="https://x.com/ssaarthakk" target="_blank" rel="noopener noreferrer">
+                @ssaarthakk
+              </a>
+              .
             </p>
           </Tile>
         </Section>

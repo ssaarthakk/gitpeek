@@ -77,7 +77,7 @@ export default function PrivacyPage() {
     <LegalDoc
       doc="privacy"
       title="Privacy Policy"
-      updated="[DATE]"
+      updated="September 22, 2026"
       intro={
         <p>
           Your privacy is important to us. This policy explains what information we collect, how we use it, and your
